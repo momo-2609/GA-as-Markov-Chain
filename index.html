@@ -2,23 +2,14 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Genetic Algorithms as Markov Chains</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --fg:#1a1a18;--fg2:#5a5a54;--fg3:#9a9a92;
-  --bg:#fafaf7;--bg2:#f0f0eb;--bg3:#e4e4dd;
-  --green:#1B4332;--green2:#2D6A4F;--green3:#D8F3DC;--green4:#B7E4C7;
-}
-@media(prefers-color-scheme:dark){:root{
-  --fg:#e8e8e2;--fg2:#a8a8a0;--fg3:#68685e;
-  --bg:#141412;--bg2:#1e1e1a;--bg3:#282822;
-  --green:#52b788;--green2:#74c69d;--green3:#1a3324;--green4:#213d2c;
-}}
+:root{--fg:#1a1a18;--fg2:#5a5a54;--fg3:#9a9a92;--bg:#fafaf7;--bg2:#f0f0eb;--bg3:#e4e4dd;--green:#1B4332;--green2:#2D6A4F;--green3:#D8F3DC;--green4:#B7E4C7;}
+@media(prefers-color-scheme:dark){:root{--fg:#e8e8e2;--fg2:#a8a8a0;--fg3:#68685e;--bg:#141412;--bg2:#1e1e1a;--bg3:#282822;--green:#52b788;--green2:#74c69d;--green3:#1a3324;--green4:#213d2c;}}
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);font-size:15px;line-height:1.7;min-height:100vh}
-
 .hero{padding:56px 40px 40px;border-bottom:1px solid var(--bg3);position:relative;overflow:hidden}
 .hero-inner{max-width:860px;margin:0 auto;position:relative;z-index:1}
 .badge{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green2);background:var(--green3);border:1px solid var(--green4);padding:3px 10px;border-radius:20px;margin-bottom:18px}
@@ -26,20 +17,18 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--fg);font-
 h1{font-family:'DM Serif Display',serif;font-size:clamp(28px,5vw,48px);font-weight:400;line-height:1.15;color:var(--fg);margin-bottom:14px}
 h1 span{color:var(--green2)}
 .subtitle{font-size:15px;color:var(--fg2);max-width:560px;line-height:1.7;margin-bottom:28px}
-.meta-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:13px;color:var(--fg3);font-family:'JetBrains Mono',monospace}
+.meta-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;font-size:13px;font-family:'JetBrains Mono',monospace}
 .meta-chip{display:flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--bg3);padding:4px 10px;border-radius:6px;color:var(--fg2)}
 .dot{width:8px;height:8px;border-radius:50%;background:var(--green2)}
 #bg-canvas{position:absolute;top:0;left:0;width:100%;height:100%;opacity:.07;pointer-events:none}
-
 .tabs{border-bottom:1px solid var(--bg3);background:var(--bg);position:sticky;top:0;z-index:10}
-.tabs-inner{max-width:860px;margin:0 auto;padding:0 40px;display:flex;gap:0;overflow-x:auto}
+.tabs-inner{max-width:860px;margin:0 auto;padding:0 40px;display:flex;overflow-x:auto}
 .tab-btn{font-family:'DM Sans',sans-serif;font-size:13px;color:var(--fg2);background:none;border:none;border-bottom:2px solid transparent;padding:12px 16px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .tab-btn:hover{color:var(--fg)}
 .tab-btn.active{color:var(--fg);border-bottom-color:var(--green2);font-weight:500}
-
 .content{max-width:860px;margin:0 auto;padding:36px 40px}
-.section{display:none}.section.active{display:block}
-
+.section{display:none}
+.section.active{display:block}
 .grid-3{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:36px}
 .card{background:var(--bg2);border:1px solid var(--bg3);border-radius:10px;padding:20px}
 .card-icon{font-size:22px;margin-bottom:10px}
@@ -47,21 +36,17 @@ h1 span{color:var(--green2)}
 .card p{font-size:13px;color:var(--fg2);line-height:1.6}
 .section-title{font-family:'DM Serif Display',serif;font-size:22px;font-weight:400;color:var(--fg);margin-bottom:6px}
 .section-sub{font-size:13px;color:var(--fg2);margin-bottom:24px}
-
-.slider-row{display:flex;align-items:center;gap:14px;margin-bottom:24px;flex-wrap:wrap}
+.slider-row{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
 .slider-row label{font-size:13px;color:var(--fg2);min-width:130px;font-family:'JetBrains Mono',monospace}
 .slider-row input[type=range]{flex:1;min-width:120px;accent-color:var(--green2)}
-.slider-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--green2);min-width:28px}
-
+.slider-val{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:500;color:var(--green2);min-width:36px}
 #tourn-chart-wrap{position:relative;height:260px;width:100%;margin-bottom:12px}
 .formula-block{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--bg2);border:1px solid var(--bg3);border-left:3px solid var(--green2);padding:14px 18px;border-radius:0 8px 8px 0;color:var(--fg);margin-bottom:20px;overflow-x:auto;line-height:1.8}
-
 #vol-chart-wrap{position:relative;height:240px;width:100%;margin-bottom:20px}
 .stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:24px}
 .stat-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;padding:14px;text-align:center}
 .stat-num{font-family:'JetBrains Mono',monospace;font-size:17px;font-weight:500;color:var(--green2);display:block;margin-bottom:2px}
 .stat-lbl{font-size:11px;color:var(--fg3)}
-
 .kernel-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px}
 @media(max-width:520px){.kernel-grid{grid-template-columns:1fr}}
 .kernel-card{background:var(--bg2);border:1px solid var(--bg3);border-radius:10px;padding:18px}
@@ -72,22 +57,14 @@ h1 span{color:var(--green2)}
 #pm-slider-row{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
 #pm-slider-row label{font-size:13px;color:var(--fg2);font-family:'JetBrains Mono',monospace}
 #pm-slider-row input[type=range]{flex:1;min-width:100px;accent-color:var(--green2)}
-.irred-box{background:var(--green3);border:1px solid var(--green4);border-radius:10px;padding:18px;margin-top:20px;font-size:13px;color:var(--fg);transition:background .3s,border-color .3s}
+.irred-box{border-radius:10px;padding:18px;margin-top:20px;font-size:13px;color:var(--fg);transition:background .3s,border-color .3s;background:var(--green3);border:1px solid var(--green4)}
 .irred-box strong{color:var(--green2)}
-
-#norm-wrap{position:relative;height:260px;width:100%;margin-bottom:16px}
 .info-note{font-size:13px;color:var(--fg2);background:var(--bg2);border:1px solid var(--bg3);border-radius:8px;padding:12px 16px;margin-bottom:16px;line-height:1.6}
-
 .ref-list{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:8px}
 .ref-list li{font-size:13px;color:var(--fg2);padding-left:18px;position:relative;line-height:1.6}
 .ref-list li::before{content:'[';position:absolute;left:0;color:var(--green2);font-family:'JetBrains Mono',monospace}
 .ref-list li::after{content:']';color:var(--green2);font-family:'JetBrains Mono',monospace}
-
-@media(max-width:560px){
-  .hero{padding:36px 20px 28px}
-  .content{padding:24px 20px}
-  .tabs-inner{padding:0 20px}
-}
+@media(max-width:560px){.hero{padding:36px 20px 28px}.content{padding:24px 20px}.tabs-inner{padding:0 20px}}
 </style>
 </head>
 <body>
@@ -100,8 +77,8 @@ h1 span{color:var(--green2)}
     <p class="subtitle">Proofs and interactive demonstrations. Domain 𝒟 = [ℓ, u] ⊂ ℝᴹ. Tournament selection, crossover geometry, offspring kernels, and ergodicity.</p>
     <div class="meta-row">
       <span class="meta-chip"><span class="dot"></span>Mathematics</span>
-      <span class="meta-chip">Rudolph 1994 · Vose 1999 · Meyn & Tweedie 1993</span>
-      <span class="meta-chip">4 sections · interactive</span>
+      <span class="meta-chip">Rudolph 1994 · Vose 1999 · Meyn &amp; Tweedie 1993</span>
+      <span class="meta-chip">5 sections · interactive</span>
     </div>
   </div>
 </div>
@@ -118,7 +95,7 @@ h1 span{color:var(--green2)}
 
 <div class="content">
 
-  <!-- TOURNAMENT -->
+  <!-- ══ TOURNAMENT ══ -->
   <div id="sec-tournament" class="section active">
     <div class="section-title">Tournament Selection</div>
     <p class="section-sub">Probability that individual of rank <em>i</em> wins a <em>k</em>-tournament in a population of size <em>N</em></p>
@@ -136,29 +113,26 @@ h1 span{color:var(--green2)}
     <div id="tourn-chart-wrap"><canvas id="tourn-chart"></canvas></div>
     <p style="font-size:12px;color:var(--fg3);font-family:'JetBrains Mono',monospace;text-align:center;margin-bottom:28px">Rank 1 = worst, rank N = best. Higher k → sharper selection pressure.</p>
     <div class="grid-3">
-      <div class="card"><div class="card-icon">⚖️</div><h3>k = 1 — Uniform</h3><p>All individuals equally likely. No selection pressure. Equivalent to random sampling.</p></div>
-      <div class="card"><div class="card-icon">📈</div><h3>k = 2 — Linear</h3><p>Selection probability grows linearly with rank. Gentle bias toward better individuals.</p></div>
-      <div class="card"><div class="card-icon">🎯</div><h3>k = N — Deterministic</h3><p>Only the best individual can win. Elitist selection; can destroy population diversity.</p></div>
+      <div class="card"><div class="card-icon">⚖️</div><h3>k = 1 — Uniform</h3><p>All individuals equally likely. No selection pressure.</p></div>
+      <div class="card"><div class="card-icon">📈</div><h3>k = 2 — Linear</h3><p>Selection probability grows linearly with rank.</p></div>
+      <div class="card"><div class="card-icon">🎯</div><h3>k = N — Deterministic</h3><p>Only the best individual can win. Can destroy diversity.</p></div>
     </div>
   </div>
 
-  <!-- VOLUME -->
+  <!-- ══ VOLUME ══ -->
   <div id="sec-volume" class="section">
     <div class="section-title">Crossover Hyperrectangle Volume</div>
     <p class="section-sub">Drag the parents, click to scatter offspring — they land only inside R(a,b)</p>
     <div class="formula-block">𝔼[Vol(R(a,b))] = Vol(𝒟) / 3ᴹ</div>
-
-    <p style="font-size:13px;color:var(--fg2);text-align:center;margin-bottom:10px">Drag <span style="color:#1B4332;font-weight:500">a</span> and <span style="color:#854F0B;font-weight:500">b</span> to reposition parents &nbsp;·&nbsp; click anywhere to spawn offspring</p>
+    <p style="font-size:13px;color:var(--fg2);text-align:center;margin-bottom:10px">Drag <span style="color:#1B4332;font-weight:500">a</span> and <span style="color:#854F0B;font-weight:500">b</span> to reposition parents · click anywhere to spawn offspring</p>
     <div style="position:relative;width:100%;margin-bottom:12px">
       <canvas id="xo-canvas" style="display:block;width:100%;border-radius:10px;border:1px solid var(--bg3);background:var(--bg2);cursor:crosshair"></canvas>
     </div>
-
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
       <div class="stat-card"><span class="stat-num" id="xo-vol">—</span><span class="stat-lbl">R(a,b) / domain</span></div>
       <div class="stat-card"><span class="stat-num" id="xo-n">0</span><span class="stat-lbl">offspring dropped</span></div>
       <div class="stat-card"><span class="stat-num" style="color:#c0392b" id="xo-esc">0%</span><span class="stat-lbl">escaped R (mutation)</span></div>
     </div>
-
     <div class="slider-row">
       <label>offspring / click</label>
       <input type="range" id="sl-batch" min="1" max="30" value="8" step="1" oninput="document.getElementById('vl-batch').textContent=this.value">
@@ -174,22 +148,21 @@ h1 span{color:var(--green2)}
       <button onclick="xoClear()" style="font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer">Clear offspring</button>
       <button onclick="xoRandom()" style="font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer">Random parents</button>
     </div>
-
     <p style="font-size:13px;color:var(--fg2);margin-bottom:8px">The volume collapse gets worse in higher dimensions:</p>
     <div id="vol-chart-wrap"><canvas id="vol-chart"></canvas></div>
     <div class="stat-row" id="stat-row"></div>
     <div class="slider-row">
-      <label style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--fg2);min-width:140px">Max dimension M</label>
+      <label style="min-width:140px">Max dimension M</label>
       <input type="range" id="sl-M" min="3" max="30" value="10" oninput="updateVol()">
       <span class="slider-val" id="val-M">10</span>
     </div>
     <div class="card" style="margin-top:8px">
       <h3 style="margin-bottom:8px">Why does this matter?</h3>
-      <p>Crossover alone cannot guarantee ergodicity in any dimension above 1. As M grows, the expected hyperrectangle covers a negligible fraction of the domain. Mutation (p<sub>m</sub> &gt; 0) is the necessary ingredient for the chain to be irreducible.</p>
+      <p>Crossover alone cannot guarantee ergodicity. As M grows, the expected hyperrectangle covers a negligible fraction of the domain. Mutation (p<sub>m</sub> &gt; 0) is the necessary ingredient.</p>
     </div>
   </div>
 
-  <!-- KERNEL -->
+  <!-- ══ KERNEL ══ -->
   <div id="sec-kernel" class="section">
     <div class="section-title">Four-Component Offspring Kernel</div>
     <p class="section-sub">The offspring density p(z′ | a, b) decomposes into four terms from expanding the crossover × mutation mixture</p>
@@ -209,16 +182,16 @@ h1 span{color:var(--green2)}
     </div>
     <div class="kernel-grid" id="kernel-grid"></div>
     <div class="irred-box" id="irred-box">
-      <strong>Irreducibility engine:</strong> term (iii) has full support on 𝒟 whenever p<sub>m</sub> &gt; 0 and Σ is positive definite — the truncated Gaussian is strictly positive everywhere. This single term drives the chain to any open set with positive Lebesgue measure.
+      <strong>Irreducibility engine:</strong> term (iii) has full support on 𝒟 whenever p<sub>m</sub> &gt; 0 and Σ is positive definite — the truncated Gaussian is strictly positive everywhere.
     </div>
   </div>
 
-  <!-- NORMALISE -->
+  <!-- ══ NORMALISE ══ -->
   <div id="sec-normalise" class="section">
     <div class="section-title">Mutation Normalising Constant Z(z, Σ)</div>
     <p class="section-sub">For diagonal Σ = diag(σ₁²,…,σₘ²) the constant factorises over components</p>
     <div class="formula-block">Z(z, Σ) = ∏ⱼ [ Φ((uʲ−zʲ)/σⱼ) − Φ((lʲ−zʲ)/σⱼ) ]</div>
-    <div class="info-note">Drag the dot to change the mutation centre z ∈ [0,1]². <strong style="color:var(--fg)">Blue = most mass escapes (low Z), red = almost none escapes (Z ≈ 1).</strong> Near boundaries, mass overshoots and the density inflates by 1/Z to compensate.</div>
+    <div class="info-note">Drag the dot to change the mutation centre z ∈ [0,1]². <strong style="color:var(--fg)">Blue = most mass escapes (low Z), red = almost none escapes (Z ≈ 1).</strong></div>
     <div style="position:relative;width:100%;margin-bottom:8px">
       <canvas id="norm-heatmap" style="width:100%;display:block;cursor:crosshair;border-radius:8px;border:1px solid var(--bg3)"></canvas>
       <canvas id="norm-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;border-radius:8px"></canvas>
@@ -229,7 +202,7 @@ h1 span{color:var(--green2)}
       <span style="font-size:11px;color:var(--fg3);font-family:'JetBrains Mono',monospace;white-space:nowrap">Z ≈ 1</span>
     </div>
     <div class="slider-row">
-      <label style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--fg2)">σ</label>
+      <label style="min-width:30px">σ</label>
       <input type="range" id="sl-sig" min="3" max="35" value="12" step="1" oninput="renderHeatmap()">
       <span class="slider-val" id="val-sig">0.12</span>
     </div>
@@ -239,57 +212,49 @@ h1 span{color:var(--green2)}
     </div>
     <p id="norm-readout" style="font-size:12px;color:var(--fg3);font-family:'JetBrains Mono',monospace;margin-bottom:24px"></p>
     <div class="grid-3">
-      <div class="card"><h3>Interior point</h3><p>z = (0.5, 0.5): Z ≈ 1.00. Almost no mass escapes. No inflation needed.</p></div>
-      <div class="card"><h3>Near one wall</h3><p>z = (0.5, 0.92): Z ≈ 0.79. ~21% of mass overshoots the upper boundary.</p></div>
-      <div class="card"><h3>Corner point</h3><p>z = (0.05, 0.05): Z ≈ 0.25. Three-quarters of Gaussian mass exits the domain.</p></div>
-    </div>
+      <div class="card"><h3>Interior point</h3><p>z = (0.5, 0.5): Z ≈ 1.00. Almost no mass escapes.</p></div>
+      <div class="card"><h3>Near one wall</h3><p>z = (0.5, 0.92): Z ≈ 0.79. ~21% of mass overshoots.</p></div>
+      <div class="card"><h3>Corner point</h3><p>z = (0.05, 0.05): Z ≈ 0.25. Three-quarters exits.</p></div>
     </div>
   </div>
 
-  <!-- PLAYGROUND -->
+  <!-- ══ PLAYGROUND ══ -->
   <div id="sec-playground" class="section">
     <div class="section-title">GA Playground</div>
     <p class="section-sub">Pick a function, tune the constants, watch the population evolve</p>
-
     <div id="pg-presets" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
-
     <div class="slider-row">
-      <label style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--fg2)">f(x,y) =</label>
+      <label style="min-width:60px">f(x,y) =</label>
       <input id="pg-formula" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;padding:7px 12px;border-radius:6px;border:1px solid var(--bg3);background:var(--bg2);color:var(--fg);min-width:0" value="sin(3*x)*cos(3*y)+0.5*sin(6*x+y)">
     </div>
     <p id="pg-err" style="font-size:12px;color:#c0392b;min-height:18px;margin-bottom:10px"></p>
-
     <div class="slider-row"><label>population N</label><input type="range" id="pg-N" min="10" max="100" value="30" step="1" oninput="document.getElementById('pg-vN').textContent=this.value"><span class="slider-val" id="pg-vN">30</span></div>
     <div class="slider-row"><label>tournament k</label><input type="range" id="pg-k" min="2" max="10" value="3" step="1" oninput="document.getElementById('pg-vk').textContent=this.value"><span class="slider-val" id="pg-vk">3</span></div>
     <div class="slider-row"><label>mutation σ</label><input type="range" id="pg-sig" min="1" max="30" value="8" step="1" oninput="document.getElementById('pg-vsig').textContent=(this.value/100).toFixed(2)"><span class="slider-val" id="pg-vsig">0.08</span></div>
     <div class="slider-row"><label>crossover p<sub>c</sub></label><input type="range" id="pg-pc" min="0" max="100" value="70" step="1" oninput="document.getElementById('pg-vpc').textContent=(this.value/100).toFixed(2)"><span class="slider-val" id="pg-vpc">0.70</span></div>
     <div class="slider-row"><label>mutation p<sub>m</sub></label><input type="range" id="pg-pm" min="0" max="100" value="30" step="1" oninput="document.getElementById('pg-vpm').textContent=(this.value/100).toFixed(2)"><span class="slider-val" id="pg-vpm">0.30</span></div>
     <div class="slider-row"><label>speed</label><input type="range" id="pg-spd" min="1" max="10" value="3" step="1" oninput="document.getElementById('pg-vspd').textContent=this.value"><span class="slider-val" id="pg-vspd">3</span></div>
-
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
       <button id="pg-btn-run" onclick="pgToggleRun()" style="font-size:12px;padding:7px 16px;border-radius:6px;border:1px solid var(--green4);background:var(--green3);color:var(--green2);cursor:pointer">▶ Run</button>
       <button onclick="pgReset()" style="font-size:12px;padding:7px 16px;border-radius:6px;border:1px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer">↺ Reset</button>
       <button onclick="pgStep()" style="font-size:12px;padding:7px 16px;border-radius:6px;border:1px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer">Step +1</button>
     </div>
-
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
       <div class="stat-card"><span class="stat-num" id="pg-sgen">0</span><span class="stat-lbl">generation</span></div>
       <div class="stat-card"><span class="stat-num" id="pg-sbest">—</span><span class="stat-lbl">best fitness</span></div>
       <div class="stat-card"><span class="stat-num" id="pg-smean">—</span><span class="stat-lbl">mean fitness</span></div>
       <div class="stat-card"><span class="stat-num" id="pg-spos" style="font-size:12px">—</span><span class="stat-lbl">best position</span></div>
     </div>
-
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
       <canvas id="pg-land" style="display:block;width:100%;border-radius:10px;border:1px solid var(--bg3)"></canvas>
       <canvas id="pg-chart" style="display:block;width:100%;border-radius:10px;border:1px solid var(--bg3)"></canvas>
     </div>
-
     <div style="margin-top:8px;padding-top:24px;border-top:1px solid var(--bg3)">
       <div class="section-title" style="font-size:18px;margin-bottom:10px">References</div>
       <ul class="ref-list">
         <li>G. Rudolph, <em>Convergence analysis of canonical genetic algorithms</em>, IEEE Trans. Neural Networks 5(1):96–101, 1994.</li>
         <li>M. D. Vose, <em>The Simple Genetic Algorithm: Foundations and Theory</em>, MIT Press, 1999.</li>
-        <li>S. P. Meyn & R. L. Tweedie, <em>Markov Chains and Stochastic Stability</em>, Springer, 1993.</li>
+        <li>S. P. Meyn &amp; R. L. Tweedie, <em>Markov Chains and Stochastic Stability</em>, Springer, 1993.</li>
       </ul>
     </div>
   </div>
@@ -311,7 +276,7 @@ function comb(n,r){if(r<0||r>n)return 0;if(r===0||r===n)return 1;let x=1;for(let
 function phi(x){return Math.exp(-0.5*x*x)/Math.sqrt(2*Math.PI)}
 function Phi(x){let t=1/(1+0.2316419*Math.abs(x)),p=t*(0.319381530+t*(-0.356563782+t*(1.781477937+t*(-1.821255978+t*1.330274429))));let s=1-phi(Math.abs(x))*p;return x>=0?s:1-s}
 
-// Background animation
+// Background
 (function(){
   const c=document.getElementById('bg-canvas');
   const hero=c.parentElement;
@@ -321,27 +286,25 @@ function Phi(x){let t=1/(1+0.2316419*Math.abs(x)),p=t*(0.319381530+t*(-0.3565637
   const G=dark?'#74c69d':'#2D6A4F';
   const pts=Array.from({length:40},()=>({x:Math.random()*c.width,y:Math.random()*c.height,r:Math.random()*1.5+0.5,vx:(Math.random()-.5)*.2,vy:(Math.random()-.5)*.2}));
   function frame(){
-    ctx.clearRect(0,0,c.width,c.height);
-    ctx.strokeStyle=G;ctx.lineWidth=0.5;
-    for(let i=0;i<pts.length;i++){for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){ctx.globalAlpha=(1-d/100)*.3;ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke()}}}
+    ctx.clearRect(0,0,c.width,c.height);ctx.strokeStyle=G;ctx.lineWidth=0.5;
+    for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<100){ctx.globalAlpha=(1-d/100)*.3;ctx.beginPath();ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke()}}
     ctx.globalAlpha=1;
-    for(const p of pts){ctx.fillStyle=G;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,2*Math.PI);ctx.fill();p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1;}
+    for(const p of pts){ctx.fillStyle=G;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,2*Math.PI);ctx.fill();p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>c.width)p.vx*=-1;if(p.y<0||p.y>c.height)p.vy*=-1}
     requestAnimationFrame(frame);
   }
   frame();
 })();
 
-// Tab switching
+// Tabs
 function show(id,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  const sec=document.getElementById('sec-'+id);
-  if(sec)sec.classList.add('active');
+  document.getElementById('sec-'+id).classList.add('active');
   btn.classList.add('active');
-  if(id==='volume')setTimeout(()=>{initVolChart();updateVol();const cv=document.getElementById('xo-canvas');if(cv){const W=cv.parentElement.clientWidth||500;cv.width=W;cv.height=Math.round(W*0.55);}},50);
+  if(id==='volume')setTimeout(()=>{initVolChart();updateVol();const cv=document.getElementById('xo-canvas');if(cv&&!cv.width){const W=cv.parentElement.clientWidth||500;cv.width=W;cv.height=Math.round(W*0.55);}},60);
   if(id==='normalise')setTimeout(()=>{renderHeatmap();buildLegend();},80);
   if(id==='kernel')updateKernel();
-  if(id==='playground')setTimeout(()=>pgInit(),80);
+  if(id==='playground')setTimeout(pgInit,80);
 }
 
 // Tournament
@@ -355,16 +318,16 @@ function updateTourn(){
   const data=labels.map(i=>comb(i-1,k-1)/comb(N,k));
   const ctx2=document.getElementById('tourn-chart').getContext('2d');
   if(tournChart)tournChart.destroy();
-  tournChart=new Chart(ctx2,{type:'bar',data:{labels,datasets:[{label:'Pt(i)',data,backgroundColor:data.map(d=>d>0?GREEN+'cc':FG2+'33'),borderColor:data.map(d=>d>0?GREEN:FG2),borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>`P_t(${c.label}) = ${c.raw.toFixed(4)}`}}},scales:{x:{ticks:{color:FG2,font:{size:11}},grid:{color:BG3},title:{display:true,text:'Rank i',color:FG2,font:{size:11}}},y:{ticks:{color:FG2,font:{size:11}},grid:{color:BG3},max:1,title:{display:true,text:'P_t(i)',color:FG2,font:{size:11}}}}}});
+  tournChart=new Chart(ctx2,{type:'bar',data:{labels,datasets:[{label:'Pt(i)',data,backgroundColor:data.map(d=>d>0?GREEN+'cc':FG2+'33'),borderColor:data.map(d=>d>0?GREEN:FG2),borderWidth:1,borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>'P_t('+c.label+') = '+c.raw.toFixed(4)}}},scales:{x:{ticks:{color:FG2,font:{size:11}},grid:{color:BG3},title:{display:true,text:'Rank i',color:FG2,font:{size:11}}},y:{ticks:{color:FG2,font:{size:11}},grid:{color:BG3},max:1,title:{display:true,text:'P_t(i)',color:FG2,font:{size:11}}}}}});
 }
 updateTourn();
 
-// Volume
+// Volume chart
 let volChart=null;
 function initVolChart(){
   if(volChart)return;
   const ctx3=document.getElementById('vol-chart').getContext('2d');
-  volChart=new Chart(ctx3,{type:'line',data:{labels:[],datasets:[{label:'(1/3)^M',data:[],borderColor:GREEN,backgroundColor:GREEN+'20',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:GREEN}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:FG2,font:{size:11}},grid:{color:BG3},title:{display:true,text:'Dimension M',color:FG2,font:{size:11}}},y:{ticks:{color:FG2,font:{size:11},callback:v=>v<0.0001?v.toExponential(1):v.toFixed(3)},grid:{color:BG3},type:'logarithmic',title:{display:true,text:'E[Vol] / Vol(D)',color:FG2,font:{size:11}}}}}});
+  volChart=new Chart(ctx3,{type:'line',data:{labels:[],datasets:[{label:'(1/3)^M',data:[],borderColor:GREEN,backgroundColor:GREEN+'20',fill:true,tension:.4,pointRadius:3,pointBackgroundColor:GREEN}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:FG2,font:{size:11}},grid:{color:BG3},title:{display:true,text:'Dimension M',color:FG2,font:{size:11}}},y:{ticks:{color:FG2,font:{size:11},callback:v=>v<0.0001?v.toExponential(1):v.toFixed(3)},grid:{color:BG3},type:'logarithmic',title:{display:true,text:'E[Vol]/Vol(D)',color:FG2,font:{size:11}}}}}});
 }
 function updateVol(){
   const Mmax=+document.getElementById('sl-M').value;
@@ -372,29 +335,10 @@ function updateVol(){
   const labels=[],data=[];
   for(let m=1;m<=Mmax;m++){labels.push(m);data.push(Math.pow(1/3,m))}
   if(volChart){volChart.data.labels=labels;volChart.data.datasets[0].data=data;volChart.update()}
-  const milestones=[1,2,5,10,20].filter(m=>m<=Mmax);
-  document.getElementById('stat-row').innerHTML=milestones.map(m=>{const v=Math.pow(1/3,m);const str=v<1e-6?v.toExponential(1):(v*100).toFixed(1)+'%';return`<div class="stat-card"><span class="stat-num">${str}</span><span class="stat-lbl">M = ${m}</span></div>`;}).join('');
+  const ms=[1,2,5,10,20].filter(m=>m<=Mmax);
+  document.getElementById('stat-row').innerHTML=ms.map(m=>{const v=Math.pow(1/3,m);const s=v<1e-6?v.toExponential(1):(v*100).toFixed(1)+'%';return'<div class="stat-card"><span class="stat-num">'+s+'</span><span class="stat-lbl">M = '+m+'</span></div>';}).join('');
 }
-setTimeout(()=>{initVolChart();updateVol()},100);
-
-// Kernel
-function updateKernel(){
-  const pm=+document.getElementById('sl-pm').value/100;
-  const pc=+document.getElementById('sl-pc').value/100;
-  document.getElementById('val-pm').textContent=pm.toFixed(2);
-  document.getElementById('val-pc').textContent=pc.toFixed(2);
-  const terms=[
-    {num:'i',label:'Crossover → Mutate',w:pc*pm,desc:`p_c·p_m = ${(pc*pm).toFixed(3)}. Convolution of uniform & Gaussian kernels. Richest term; requires M-dimensional integral.`},
-    {num:'ii',label:'Crossover only',w:pc*(1-pm),desc:`p_c·(1−p_m) = ${(pc*(1-pm)).toFixed(3)}. Offspring lies uniformly in R(a,b). Cannot reach outside the rectangle.`},
-    {num:'iii',label:'Mutation only',w:(1-pc)*pm,desc:`(1−p_c)·p_m = ${((1-pc)*pm).toFixed(3)}. Truncated Gaussian centred at parent a. Full support on D. Engine of irreducibility.`},
-    {num:'iv',label:'No operator',w:(1-pc)*(1-pm),desc:`(1−p_c)·(1−p_m) = ${((1-pc)*(1-pm)).toFixed(3)}. Dirac mass — exact copy of parent a. No exploration.`},
-  ];
-  document.getElementById('kernel-grid').innerHTML=terms.map(t=>`<div class="kernel-card"><div class="num">(${t.num})</div><div class="active-bar" style="width:${Math.max(2,t.w*100).toFixed(1)}%;background:${t.num==='iii'?GREEN:BG3}"></div><h4>${t.label}</h4><p>${t.desc}</p></div>`).join('');
-  const box=document.getElementById('irred-box');
-  if(pm===0){box.innerHTML='<strong style="color:#c0392b">Warning: p<sub>m</sub> = 0.</strong> Term (iii) vanishes. The chain is <strong>reducible</strong>: offspring must lie in the bounding box of the current population, which can never expand. Ergodicity is lost.';box.style.background='#fde8e8';box.style.borderColor='#f7c1c1';}
-  else{box.innerHTML='<strong>Irreducibility engine:</strong> term (iii) has full support on 𝒟 whenever p<sub>m</sub> &gt; 0 and Σ is positive definite — the truncated Gaussian is strictly positive everywhere. This single term drives the chain to any open set with positive Lebesgue measure.';box.style.background=GREENL;box.style.borderColor=GREENB;}
-}
-updateKernel();
+setTimeout(()=>{initVolChart();updateVol();},100);
 
 // Crossover canvas
 (function(){
@@ -404,15 +348,7 @@ updateKernel();
   let W,H,PAD=32;
   let pa={x:0.25,y:0.6},pb={x:0.72,y:0.3};
   let offspring=[],totalDropped=0,totalEsc=0,dragging=null;
-  const C={
-    rectFill:dark?'rgba(55,138,221,0.12)':'rgba(55,138,221,0.10)',
-    rectStroke:dark?'#378ADD':'#185FA5',
-    a:dark?'#52b788':'#1B4332',
-    b:dark?'#EF9F27':'#854F0B',
-    off:dark?'rgba(160,100,210,0.7)':'rgba(110,50,170,0.65)',
-    offMut:dark?'rgba(220,80,80,0.75)':'rgba(180,30,30,0.65)',
-    grid:dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.04)',
-  };
+  const C={rectFill:dark?'rgba(55,138,221,0.12)':'rgba(55,138,221,0.10)',rectStroke:dark?'#378ADD':'#185FA5',a:dark?'#52b788':'#1B4332',b:dark?'#EF9F27':'#854F0B',off:dark?'rgba(160,100,210,0.7)':'rgba(110,50,170,0.65)',offMut:dark?'rgba(220,80,80,0.75)':'rgba(180,30,30,0.65)',grid:dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.04)'};
   function resize(){W=cv.parentElement.clientWidth||500;H=Math.round(W*0.55);cv.width=W;cv.height=H;draw();}
   function toC(nx,ny){return{x:PAD+nx*(W-2*PAD),y:PAD+ny*(H-2*PAD)}}
   function toN(cx,cy){return{x:Math.max(0,Math.min(1,(cx-PAD)/(W-2*PAD))),y:Math.max(0,Math.min(1,(cy-PAD)/(H-2*PAD)))}}
@@ -432,41 +368,59 @@ updateKernel();
     ctx.beginPath();ctx.moveTo(ca.x,ca.y);ctx.lineTo(rx,ry);ctx.stroke();
     ctx.beginPath();ctx.moveTo(cb.x,cb.y);ctx.lineTo(rx+rw,ry+rh);ctx.stroke();
     ctx.globalAlpha=1;ctx.setLineDash([]);
-    [['a',ca,C.a],['b',cb,C.b]].forEach(([lbl,c,col])=>{ctx.beginPath();ctx.arc(c.x,c.y,9,0,2*Math.PI);ctx.fillStyle=col;ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(lbl,c.x,c.y+4);});
+    [['a',ca,C.a],['b',cb,C.b]].forEach(function(t){const lbl=t[0],c=t[1],col=t[2];ctx.beginPath();ctx.arc(c.x,c.y,9,0,2*Math.PI);ctx.fillStyle=col;ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(lbl,c.x,c.y+4);});
     const vol=Math.abs(pa.x-pb.x)*Math.abs(pa.y-pb.y);
     document.getElementById('xo-vol').textContent=(vol*100).toFixed(1)+'%';
     document.getElementById('xo-n').textContent=totalDropped;
     document.getElementById('xo-esc').textContent=totalDropped>0?Math.round(totalEsc/totalDropped*100)+'%':'0%';
   }
-  function spawn(nx,ny){
+  function spawn(){
     const batch=+document.getElementById('sl-batch').value;
     const useMut=document.getElementById('cb-mut').checked;
     const lx=Math.min(pa.x,pb.x),ux=Math.max(pa.x,pb.x),ly=Math.min(pa.y,pb.y),uy=Math.max(pa.y,pb.y);
     for(let i=0;i<batch;i++){
       let ox=lx+Math.random()*(ux-lx),oy=ly+Math.random()*(uy-ly),esc=false;
       if(useMut){const s=0.06;ox=Math.max(0,Math.min(1,ox+rn()*s));oy=Math.max(0,Math.min(1,oy+rn()*s));if(ox<lx||ox>ux||oy<ly||oy>uy)esc=true;}
-      offspring.push({x:ox,y:oy,mut:useMut,esc});
-      totalDropped++;if(esc)totalEsc++;
+      offspring.push({x:ox,y:oy,mut:useMut,esc});totalDropped++;if(esc)totalEsc++;
     }
     if(offspring.length>500)offspring=offspring.slice(-500);
     draw();
   }
-  window.xoClear=function(){offspring=[];totalDropped=0;totalEsc=0;draw();}
-  window.xoRandom=function(){pa={x:0.1+Math.random()*0.35,y:0.1+Math.random()*0.8};pb={x:0.55+Math.random()*0.35,y:0.1+Math.random()*0.8};offspring=[];totalDropped=0;totalEsc=0;draw();}
+  window.xoClear=function(){offspring=[];totalDropped=0;totalEsc=0;draw();};
+  window.xoRandom=function(){pa={x:0.1+Math.random()*0.35,y:0.1+Math.random()*0.8};pb={x:0.55+Math.random()*0.35,y:0.1+Math.random()*0.8};offspring=[];totalDropped=0;totalEsc=0;draw();};
   function hit(cx,cy){const ca=toC(pa.x,pa.y),cb=toC(pb.x,pb.y);if(Math.hypot(cx-ca.x,cy-ca.y)<14)return'a';if(Math.hypot(cx-cb.x,cy-cb.y)<14)return'b';return null;}
   function pos(e){const r=cv.getBoundingClientRect();const ex=e.touches?e.touches[0].clientX:e.clientX,ey=e.touches?e.touches[0].clientY:e.clientY;return{cx:ex-r.left,cy:ey-r.top};}
-  cv.addEventListener('mousedown',e=>{const{cx,cy}=pos(e);const h=hit(cx,cy);if(h)dragging=h;else spawn(...Object.values(toN(cx,cy)));});
-  cv.addEventListener('mousemove',e=>{if(!dragging)return;const n=toN(...Object.values(pos(e)));if(dragging==='a')pa=n;else pb=n;draw();});
-  document.addEventListener('mouseup',()=>dragging=null);
-  cv.addEventListener('touchstart',e=>{e.preventDefault();const{cx,cy}=pos(e);const h=hit(cx,cy);if(h)dragging=h;else spawn(...Object.values(toN(cx,cy)));},{passive:false});
-  cv.addEventListener('touchmove',e=>{e.preventDefault();if(!dragging)return;const n=toN(...Object.values(pos(e)));if(dragging==='a')pa=n;else pb=n;draw();},{passive:false});
-  document.addEventListener('touchend',()=>dragging=null);
+  cv.addEventListener('mousedown',function(e){const p=pos(e);const h=hit(p.cx,p.cy);if(h)dragging=h;else{const n=toN(p.cx,p.cy);spawn();}});
+  cv.addEventListener('mousemove',function(e){if(!dragging)return;const p=pos(e);const n=toN(p.cx,p.cy);if(dragging==='a')pa=n;else pb=n;draw();});
+  document.addEventListener('mouseup',function(){dragging=null;});
+  cv.addEventListener('touchstart',function(e){e.preventDefault();const p=pos(e);const h=hit(p.cx,p.cy);if(h)dragging=h;else spawn();},{passive:false});
+  cv.addEventListener('touchmove',function(e){e.preventDefault();if(!dragging)return;const p=pos(e);const n=toN(p.cx,p.cy);if(dragging==='a')pa=n;else pb=n;draw();},{passive:false});
+  document.addEventListener('touchend',function(){dragging=null;});
   window.addEventListener('resize',resize);
   resize();
 })();
 
+// Kernel
+function updateKernel(){
+  const pm=+document.getElementById('sl-pm').value/100;
+  const pc=+document.getElementById('sl-pc').value/100;
+  document.getElementById('val-pm').textContent=pm.toFixed(2);
+  document.getElementById('val-pc').textContent=pc.toFixed(2);
+  const terms=[
+    {num:'i',label:'Crossover → Mutate',w:pc*pm,desc:'p_c·p_m = '+(pc*pm).toFixed(3)+'. Convolution of uniform & Gaussian kernels.'},
+    {num:'ii',label:'Crossover only',w:pc*(1-pm),desc:'p_c·(1−p_m) = '+(pc*(1-pm)).toFixed(3)+'. Offspring lies uniformly in R(a,b).'},
+    {num:'iii',label:'Mutation only',w:(1-pc)*pm,desc:'(1−p_c)·p_m = '+((1-pc)*pm).toFixed(3)+'. Full support on D. Engine of irreducibility.'},
+    {num:'iv',label:'No operator',w:(1-pc)*(1-pm),desc:'(1−p_c)·(1−p_m) = '+((1-pc)*(1-pm)).toFixed(3)+'. Exact copy of parent a.'},
+  ];
+  document.getElementById('kernel-grid').innerHTML=terms.map(t=>'<div class="kernel-card"><div class="num">('+t.num+')</div><div class="active-bar" style="width:'+Math.max(2,t.w*100).toFixed(1)+'%;background:'+(t.num==='iii'?GREEN:BG3)+'"></div><h4>'+t.label+'</h4><p>'+t.desc+'</p></div>').join('');
+  const box=document.getElementById('irred-box');
+  if(pm===0){box.innerHTML='<strong style="color:#c0392b">Warning: p<sub>m</sub> = 0.</strong> Term (iii) vanishes. The chain is <strong>reducible</strong> — offspring are confined to the initial bounding box forever.';box.style.background='#fde8e8';box.style.borderColor='#f7c1c1';}
+  else{box.innerHTML='<strong>Irreducibility engine:</strong> term (iii) has full support on 𝒟 whenever p<sub>m</sub> &gt; 0 and Σ is positive definite — strictly positive everywhere.';box.style.background=GREENL;box.style.borderColor=GREENB;}
+}
+updateKernel();
+
 // Heatmap
-let dotX=0.5,dotY=0.5,dragging=false;
+var hmDragging=false,dotX=0.5,dotY=0.5;
 function getZ(x,y,sig){return(Phi((1-x)/sig)-Phi(-x/sig))*(Phi((1-y)/sig)-Phi(-y/sig))}
 function hmColor(t){
   t=Math.max(0,Math.min(1,t));
@@ -474,83 +428,73 @@ function hmColor(t){
   else{const s=(t-0.5)*2;return[Math.round(255-s*10),Math.round(235-s*140),Math.round(200-s*185)];}
 }
 function buildLegend(){
-  const leg=document.getElementById('norm-legend');
-  const W=leg.parentElement.clientWidth||400;
-  leg.width=W;leg.height=10;
+  const leg=document.getElementById('norm-legend');if(!leg)return;
+  const W=leg.parentElement.clientWidth||400;leg.width=W;leg.height=10;
   const ctx=leg.getContext('2d');
-  for(let px=0;px<W;px++){const[r,g,b]=hmColor(px/W);ctx.fillStyle=`rgb(${r},${g},${b})`;ctx.fillRect(px,0,1,10);}
+  for(let px=0;px<W;px++){const c=hmColor(px/W);ctx.fillStyle='rgb('+c[0]+','+c[1]+','+c[2]+')';ctx.fillRect(px,0,1,10);}
 }
 function drawHMOverlay(){
   const hm=document.getElementById('norm-heatmap');
-  const ov=document.getElementById('norm-overlay');
-  const W=hm.width,H=hm.height;
-  ov.width=W;ov.height=H;
-  const ctx=ov.getContext('2d');
-  ctx.clearRect(0,0,W,H);
-  const px2=Math.round(dotX*W),py2=Math.round((1-dotY)*H);
-  ctx.beginPath();ctx.arc(px2,py2,8,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();
-  ctx.beginPath();ctx.arc(px2,py2,8,0,2*Math.PI);ctx.strokeStyle='#222';ctx.lineWidth=1.5;ctx.stroke();
-  ctx.beginPath();ctx.arc(px2,py2,3,0,2*Math.PI);ctx.fillStyle='#222';ctx.fill();
+  const ov=document.getElementById('norm-overlay');if(!hm||!ov)return;
+  ov.width=hm.width;ov.height=hm.height;
+  const ctx=ov.getContext('2d');ctx.clearRect(0,0,ov.width,ov.height);
+  const px=Math.round(dotX*hm.width),py=Math.round((1-dotY)*hm.height);
+  ctx.beginPath();ctx.arc(px,py,8,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();
+  ctx.beginPath();ctx.arc(px,py,8,0,2*Math.PI);ctx.strokeStyle='#222';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();ctx.arc(px,py,3,0,2*Math.PI);ctx.fillStyle='#222';ctx.fill();
   const sig=+document.getElementById('sl-sig').value/100;
   const zval=getZ(dotX,dotY,sig);
   document.getElementById('norm-zval').textContent=zval.toFixed(4);
   document.getElementById('norm-inf').textContent=(1/zval).toFixed(2)+'×';
-  document.getElementById('norm-readout').textContent=`z = (${dotX.toFixed(2)}, ${dotY.toFixed(2)})   σ = ${sig.toFixed(2)}`;
+  document.getElementById('norm-readout').textContent='z = ('+dotX.toFixed(2)+', '+dotY.toFixed(2)+')   σ = '+sig.toFixed(2);
 }
 function renderHeatmap(){
   const sig=+document.getElementById('sl-sig').value/100;
   document.getElementById('val-sig').textContent=sig.toFixed(2);
-  const hm=document.getElementById('norm-heatmap');
+  const hm=document.getElementById('norm-heatmap');if(!hm)return;
   const W=hm.parentElement.clientWidth||500,H=Math.round(W/2);
-  hm.width=W;hm.height=H;
-  hm.style.height=H+'px';
+  hm.width=W;hm.height=H;hm.style.height=H+'px';
   const ctx=hm.getContext('2d');
   const img=ctx.createImageData(W,H);
-  for(let py=0;py<H;py++){for(let px=0;px<W;px++){const[r,g,b]=hmColor(getZ(px/W,1-py/H,sig));const idx=(py*W+px)*4;img.data[idx]=r;img.data[idx+1]=g;img.data[idx+2]=b;img.data[idx+3]=255;}}
+  for(let py=0;py<H;py++)for(let px=0;px<W;px++){const c=hmColor(getZ(px/W,1-py/H,sig));const idx=(py*W+px)*4;img.data[idx]=c[0];img.data[idx+1]=c[1];img.data[idx+2]=c[2];img.data[idx+3]=255;}
   ctx.putImageData(img,0,0);
-  drawHMOverlay();
-  buildLegend();
+  drawHMOverlay();buildLegend();
 }
 function hmCoords(e,el){
   const r=el.getBoundingClientRect();
-  const ex=e.touches?e.touches[0].clientX:e.clientX;
-  const ey=e.touches?e.touches[0].clientY:e.clientY;
+  const ex=e.touches?e.touches[0].clientX:e.clientX,ey=e.touches?e.touches[0].clientY:e.clientY;
   return[Math.max(0,Math.min(1,(ex-r.left)/r.width)),Math.max(0,Math.min(1,1-(ey-r.top)/r.height))];
 }
-// ── GA PLAYGROUND ──────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',function(){
+  const hm=document.getElementById('norm-heatmap');
+  if(!hm)return;
+  hm.addEventListener('mousedown',function(e){hmDragging=true;const c=hmCoords(e,hm);dotX=c[0];dotY=c[1];renderHeatmap();});
+  hm.addEventListener('mousemove',function(e){if(!hmDragging)return;const c=hmCoords(e,hm);dotX=c[0];dotY=c[1];drawHMOverlay();});
+  document.addEventListener('mouseup',function(){hmDragging=false;});
+  hm.addEventListener('touchstart',function(e){e.preventDefault();hmDragging=true;const c=hmCoords(e,hm);dotX=c[0];dotY=c[1];renderHeatmap();},{passive:false});
+  hm.addEventListener('touchmove',function(e){e.preventDefault();if(!hmDragging)return;const c=hmCoords(e,hm);dotX=c[0];dotY=c[1];drawHMOverlay();},{passive:false});
+  document.addEventListener('touchend',function(){hmDragging=false;});
+});
+
+// GA Playground
 const PG_PRESETS=[
   {name:'Bumpy',expr:'sin(3*x)*cos(3*y)+0.5*sin(6*x+y)'},
   {name:'Rastrigin',expr:'-(x*x+y*y)+cos(6.28*x)+cos(6.28*y)'},
-  {name:'Peaks',expr:'3*(1-x)**2*exp(-(x**2)-(y+1)**2)-10*(x/5-x**3-y**5)*exp(-x**2-y**2)-(1/3)*exp(-(x+1)**2-y**2)'},
+  {name:'Peaks',expr:'3*(1-x)**2*Math.exp(-(x**2)-(y+1)**2)-10*(x/5-x**3-y**5)*Math.exp(-x**2-y**2)-(1/3)*Math.exp(-(x+1)**2-y**2)'},
   {name:'Wavy',expr:'sin(5*x)*sin(5*y)*exp(-(x**2+y**2)/2)'},
   {name:'Bowl',expr:'-(x**2+y**2)'},
 ];
-let pgReady=false,pgPop=null,pgGen=0,pgRunning=false,pgAnimId=null;
-let pgBestEver=null,pgLandscape=null,pgLMin=0,pgLMax=1,pgOffscreen=null;
-let pgChart=null;
+var pgReady=false,pgPop=null,pgGen=0,pgRunning=false,pgAnimId=null,pgBestEver=null;
+var pgLandscape=null,pgLMin=0,pgLMax=1,pgOffscreen=null,pgChart=null;
 const PG_DOM=[-2,2],PG_RES=100;
 
 function pgSafeEval(expr,x,y){
-  try{const fn=new Function('x','y','sin','cos','exp','sqrt','abs','log','PI',`"use strict";return ${expr.replace(/\^/g,'**')};`);const v=fn(x,y,Math.sin,Math.cos,Math.exp,Math.sqrt,Math.abs,Math.log,Math.PI);return isFinite(v)?v:null;}catch{return null;}
+  try{
+    const fn=new Function('x','y','sin','cos','exp','sqrt','abs','log','PI','Math','"use strict";return '+expr.replace(/\^/g,'**')+';');
+    const v=fn(x,y,Math.sin,Math.cos,Math.exp,Math.sqrt,Math.abs,Math.log,Math.PI,Math);
+    return isFinite(v)?v:null;
+  }catch(e){return null;}
 }
-
-function pgBuildLandscape(){
-  const expr=document.getElementById('pg-formula').value;
-  const test=pgSafeEval(expr,0,0);
-  if(test===null){document.getElementById('pg-err').textContent='⚠ invalid expression';pgLandscape=null;return false;}
-  document.getElementById('pg-err').textContent='';
-  const d=new Float32Array(PG_RES*PG_RES);
-  let mn=Infinity,mx=-Infinity;
-  for(let j=0;j<PG_RES;j++){for(let i=0;i<PG_RES;i++){
-    const x=PG_DOM[0]+(PG_DOM[1]-PG_DOM[0])*i/(PG_RES-1);
-    const y=PG_DOM[0]+(PG_DOM[1]-PG_DOM[0])*j/(PG_RES-1);
-    const v=pgSafeEval(expr,x,y)??0;
-    d[j*PG_RES+i]=v;if(v<mn)mn=v;if(v>mx)mx=v;
-  }}
-  pgLandscape=d;pgLMin=mn;pgLMax=mx;
-  return true;
-}
-
 function pgHeatColor(t){
   t=Math.max(0,Math.min(1,t));
   const stops=[[5,10,60],[20,60,140],[40,140,100],[200,210,50],[230,100,20],[180,20,10]];
@@ -558,132 +502,103 @@ function pgHeatColor(t){
   const a=stops[Math.min(i,stops.length-1)],b=stops[Math.min(i+1,stops.length-1)];
   return[Math.round(a[0]+(b[0]-a[0])*f),Math.round(a[1]+(b[1]-a[1])*f),Math.round(a[2]+(b[2]-a[2])*f)];
 }
-
+function pgBuildLandscape(){
+  const expr=document.getElementById('pg-formula').value;
+  const test=pgSafeEval(expr,0,0);
+  if(test===null){document.getElementById('pg-err').textContent='⚠ invalid expression';pgLandscape=null;return false;}
+  document.getElementById('pg-err').textContent='';
+  const d=new Float32Array(PG_RES*PG_RES);let mn=Infinity,mx=-Infinity;
+  for(let j=0;j<PG_RES;j++)for(let i=0;i<PG_RES;i++){
+    const x=PG_DOM[0]+(PG_DOM[1]-PG_DOM[0])*i/(PG_RES-1),y=PG_DOM[0]+(PG_DOM[1]-PG_DOM[0])*j/(PG_RES-1);
+    const v=pgSafeEval(expr,x,y)??0;d[j*PG_RES+i]=v;if(v<mn)mn=v;if(v>mx)mx=v;
+  }
+  pgLandscape=d;pgLMin=mn;pgLMax=mx;return true;
+}
 function pgDrawLandscape(){
   const cvL=document.getElementById('pg-land');if(!cvL)return;
-  const W=cvL.parentElement.clientWidth||300,H=W;
-  cvL.width=W;cvL.height=H;
+  const W=cvL.parentElement.clientWidth||300;cvL.width=W;cvL.height=W;
   const ctxL=cvL.getContext('2d');
-  if(!pgLandscape){ctxL.fillStyle=BG2;ctxL.fillRect(0,0,W,H);return;}
+  if(!pgLandscape){ctxL.fillStyle=BG2;ctxL.fillRect(0,0,W,W);return;}
   pgOffscreen=document.createElement('canvas');pgOffscreen.width=PG_RES;pgOffscreen.height=PG_RES;
-  const oc=pgOffscreen.getContext('2d');
-  const img=oc.createImageData(PG_RES,PG_RES);
-  for(let j=0;j<PG_RES;j++){for(let i=0;i<PG_RES;i++){
+  const oc=pgOffscreen.getContext('2d'),img=oc.createImageData(PG_RES,PG_RES);
+  for(let j=0;j<PG_RES;j++)for(let i=0;i<PG_RES;i++){
     const t=(pgLandscape[j*PG_RES+i]-pgLMin)/(pgLMax-pgLMin||1);
-    const[r,g,b]=pgHeatColor(t);
-    const idx=(j*PG_RES+i)*4;img.data[idx]=r;img.data[idx+1]=g;img.data[idx+2]=b;img.data[idx+3]=255;
-  }}
-  oc.putImageData(img,0,0);
-  ctxL.drawImage(pgOffscreen,0,0,W,H);
+    const c=pgHeatColor(t),idx=(j*PG_RES+i)*4;
+    img.data[idx]=c[0];img.data[idx+1]=c[1];img.data[idx+2]=c[2];img.data[idx+3]=255;
+  }
+  oc.putImageData(img,0,0);ctxL.drawImage(pgOffscreen,0,0,W,W);
 }
-
 function pgDrawPop(){
   const cvL=document.getElementById('pg-land');if(!cvL||!pgOffscreen)return;
-  const W=cvL.width,H=cvL.height;
-  const ctxL=cvL.getContext('2d');
-  ctxL.drawImage(pgOffscreen,0,0,W,H);
+  const W=cvL.width;const ctxL=cvL.getContext('2d');
+  ctxL.drawImage(pgOffscreen,0,0,W,W);
   const span=PG_DOM[1]-PG_DOM[0];
-  if(pgPop){
-    for(const ind of pgPop){
-      const px=(ind.x-PG_DOM[0])/span*W,py=(ind.y-PG_DOM[0])/span*H;
-      ctxL.beginPath();ctxL.arc(px,py,3,0,2*Math.PI);
-      ctxL.fillStyle='rgba(255,255,255,0.75)';ctxL.fill();
-      ctxL.strokeStyle='rgba(0,0,0,0.4)';ctxL.lineWidth=0.7;ctxL.stroke();
-    }
+  if(pgPop)for(const ind of pgPop){
+    const px=(ind.x-PG_DOM[0])/span*W,py=(ind.y-PG_DOM[0])/span*W;
+    ctxL.beginPath();ctxL.arc(px,py,3,0,2*Math.PI);ctxL.fillStyle='rgba(255,255,255,0.75)';ctxL.fill();
+    ctxL.strokeStyle='rgba(0,0,0,0.4)';ctxL.lineWidth=0.7;ctxL.stroke();
   }
   if(pgBestEver){
-    const px=(pgBestEver.x-PG_DOM[0])/span*W,py=(pgBestEver.y-PG_DOM[0])/span*H;
-    ctxL.beginPath();ctxL.arc(px,py,7,0,2*Math.PI);
-    ctxL.fillStyle='rgba(255,220,0,0.95)';ctxL.fill();
+    const px=(pgBestEver.x-PG_DOM[0])/span*W,py=(pgBestEver.y-PG_DOM[0])/span*W;
+    ctxL.beginPath();ctxL.arc(px,py,7,0,2*Math.PI);ctxL.fillStyle='rgba(255,220,0,0.95)';ctxL.fill();
     ctxL.strokeStyle='#333';ctxL.lineWidth=1.2;ctxL.stroke();
   }
 }
-
 function pgInitChart(){
   const cvC=document.getElementById('pg-chart');if(!cvC)return;
   const W=cvC.parentElement.clientWidth||300;cvC.width=W;cvC.height=W;
   if(pgChart)pgChart.destroy();
-  pgChart=new Chart(cvC,{type:'line',data:{labels:[],datasets:[
-    {label:'best',data:[],borderColor:'#f0a500',borderWidth:2,pointRadius:0,tension:.3,fill:false},
-    {label:'mean',data:[],borderColor:GREEN,borderWidth:1.5,pointRadius:0,tension:.3,fill:false,borderDash:[4,3]},
-  ]},options:{responsive:false,animation:false,plugins:{legend:{labels:{color:FG2,font:{size:11},boxWidth:12}}},scales:{x:{ticks:{color:FG2,font:{size:10},maxTicksLimit:8},grid:{color:BG3},title:{display:true,text:'generation',color:FG2,font:{size:11}}},y:{ticks:{color:FG2,font:{size:10}},grid:{color:BG3},title:{display:true,text:'fitness',color:FG2,font:{size:11}}}}}});
+  pgChart=new Chart(cvC,{type:'line',data:{labels:[],datasets:[{label:'best',data:[],borderColor:'#f0a500',borderWidth:2,pointRadius:0,tension:.3,fill:false},{label:'mean',data:[],borderColor:GREEN,borderWidth:1.5,pointRadius:0,tension:.3,fill:false,borderDash:[4,3]}]},options:{responsive:false,animation:false,plugins:{legend:{labels:{color:FG2,font:{size:11},boxWidth:12}}},scales:{x:{ticks:{color:FG2,font:{size:10},maxTicksLimit:8},grid:{color:BG3},title:{display:true,text:'generation',color:FG2,font:{size:11}}},y:{ticks:{color:FG2,font:{size:10}},grid:{color:BG3},title:{display:true,text:'fitness',color:FG2,font:{size:11}}}}}});
 }
-
 function pgFitness(ind){return pgSafeEval(document.getElementById('pg-formula').value,ind.x,ind.y)??-Infinity;}
 function pgRandNorm(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
 function pgClamp(v){return Math.max(PG_DOM[0],Math.min(PG_DOM[1],v));}
-
-function pgTournament(k){
-  let best=null;
-  for(let i=0;i<k;i++){const c=pgPop[Math.floor(Math.random()*pgPop.length)];if(!best||c.f>best.f)best=c;}
-  return best;
-}
-
+function pgTournament(k){let best=null;for(let i=0;i<k;i++){const c=pgPop[Math.floor(Math.random()*pgPop.length)];if(!best||c.f>best.f)best=c;}return best;}
 function pgInitPop(){
   const N=+document.getElementById('pg-N').value;
-  pgPop=Array.from({length:N},()=>{
-    const x=PG_DOM[0]+Math.random()*(PG_DOM[1]-PG_DOM[0]);
-    const y=PG_DOM[0]+Math.random()*(PG_DOM[1]-PG_DOM[0]);
-    return{x,y,f:0};
-  });
-  pgPop.forEach(ind=>ind.f=pgFitness(ind));
-  pgPop.sort((a,b)=>a.f-b.f);
+  pgPop=Array.from({length:N},function(){const x=PG_DOM[0]+Math.random()*(PG_DOM[1]-PG_DOM[0]),y=PG_DOM[0]+Math.random()*(PG_DOM[1]-PG_DOM[0]);return{x,y,f:0};});
+  pgPop.forEach(function(ind){ind.f=pgFitness(ind);});pgPop.sort(function(a,b){return a.f-b.f;});
 }
-
 function pgStepGA(){
-  const k=+document.getElementById('pg-k').value;
-  const sig=+document.getElementById('pg-sig').value/100;
-  const pc=+document.getElementById('pg-pc').value/100;
-  const pm=+document.getElementById('pg-pm').value/100;
-  const N=pgPop.length;
-  const next=[];
+  const k=+document.getElementById('pg-k').value,sig=+document.getElementById('pg-sig').value/100;
+  const pc=+document.getElementById('pg-pc').value/100,pm=+document.getElementById('pg-pm').value/100;
+  const N=pgPop.length,next=[];
   for(let i=0;i<N;i++){
-    const pa=pgTournament(k);
-    let cx=pa.x,cy=pa.y;
-    if(Math.random()<pc){const pb=pgTournament(k);const a=Math.random();cx=a*pa.x+(1-a)*pb.x;cy=a*pa.y+(1-a)*pb.y;}
+    const pa=pgTournament(k);let cx=pa.x,cy=pa.y;
+    if(Math.random()<pc){const pb=pgTournament(k),a=Math.random();cx=a*pa.x+(1-a)*pb.x;cy=a*pa.y+(1-a)*pb.y;}
     if(Math.random()<pm){cx=pgClamp(cx+pgRandNorm()*sig);cy=pgClamp(cy+pgRandNorm()*sig);}
     next.push({x:cx,y:cy,f:pgFitness({x:cx,y:cy})});
   }
-  pgPop=next;pgPop.sort((a,b)=>a.f-b.f);
-  pgGen++;
-  const best=pgPop[pgPop.length-1];
-  const mean=pgPop.reduce((s,i)=>s+i.f,0)/pgPop.length;
-  if(!pgBestEver||best.f>pgBestEver.f)pgBestEver={...best};
+  pgPop=next;pgPop.sort(function(a,b){return a.f-b.f;});pgGen++;
+  const best=pgPop[pgPop.length-1],mean=pgPop.reduce(function(s,i){return s+i.f;},0)/pgPop.length;
+  if(!pgBestEver||best.f>pgBestEver.f)pgBestEver=Object.assign({},best);
   document.getElementById('pg-sgen').textContent=pgGen;
   document.getElementById('pg-sbest').textContent=best.f.toFixed(3);
   document.getElementById('pg-smean').textContent=mean.toFixed(3);
-  document.getElementById('pg-spos').textContent=`(${best.x.toFixed(2)},${best.y.toFixed(2)})`;
+  document.getElementById('pg-spos').textContent='('+best.x.toFixed(2)+','+best.y.toFixed(2)+')';
   if(pgChart){
-    pgChart.data.labels.push(pgGen);
-    pgChart.data.datasets[0].data.push(best.f);
-    pgChart.data.datasets[1].data.push(mean);
+    pgChart.data.labels.push(pgGen);pgChart.data.datasets[0].data.push(best.f);pgChart.data.datasets[1].data.push(mean);
     if(pgChart.data.labels.length>200){pgChart.data.labels.shift();pgChart.data.datasets[0].data.shift();pgChart.data.datasets[1].data.shift();}
     pgChart.update('none');
   }
   pgDrawPop();
 }
-
 function pgReset(){
   pgRunning=false;cancelAnimationFrame(pgAnimId);
   document.getElementById('pg-btn-run').textContent='▶ Run';
   pgGen=0;pgBestEver=null;pgPop=null;
-  document.getElementById('pg-sgen').textContent='0';
-  document.getElementById('pg-sbest').textContent='—';
-  document.getElementById('pg-smean').textContent='—';
-  document.getElementById('pg-spos').textContent='—';
+  document.getElementById('pg-sgen').textContent='0';document.getElementById('pg-sbest').textContent='—';
+  document.getElementById('pg-smean').textContent='—';document.getElementById('pg-spos').textContent='—';
   if(pgBuildLandscape()){pgDrawLandscape();pgInitPop();pgDrawPop();}
   pgInitChart();
 }
-
-let pgLastT=0;
+var pgLastT=0;
 function pgLoop(t){
   if(!pgRunning)return;
-  const spd=+document.getElementById('pg-spd').value;
-  const delay=Math.max(0,300-spd*28);
+  const spd=+document.getElementById('pg-spd').value,delay=Math.max(0,300-spd*28);
   if(t-pgLastT>delay){pgLastT=t;pgStepGA();}
   pgAnimId=requestAnimationFrame(pgLoop);
 }
-
 function pgToggleRun(){
   pgRunning=!pgRunning;
   document.getElementById('pg-btn-run').textContent=pgRunning?'⏸ Pause':'▶ Run';
@@ -691,38 +606,27 @@ function pgToggleRun(){
   else cancelAnimationFrame(pgAnimId);
 }
 function pgStep(){if(!pgPop){if(!pgBuildLandscape())return;pgDrawLandscape();pgInitPop();}pgStepGA();}
-
 function pgInit(){
   if(pgReady)return;pgReady=true;
   const container=document.getElementById('pg-presets');
-  PG_PRESETS.forEach((p,i)=>{
+  PG_PRESETS.forEach(function(p,i){
     const b=document.createElement('button');
-    b.style.cssText='font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer;transition:all .15s';
+    b.style.cssText='font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer';
     if(i===0){b.style.background='var(--green3)';b.style.color='var(--green2)';}
     b.textContent=p.name;
-    b.onclick=()=>{
+    b.onclick=function(){
       document.getElementById('pg-formula').value=p.expr;
-      container.querySelectorAll('button').forEach(x=>{x.style.background='transparent';x.style.color='var(--fg2)';});
-      b.style.background='var(--green3)';b.style.color='var(--green2)';
-      pgReset();
+      container.querySelectorAll('button').forEach(function(x){x.style.background='transparent';x.style.color='var(--fg2)';});
+      b.style.background='var(--green3)';b.style.color='var(--green2)';pgReset();
     };
     container.appendChild(b);
   });
-  document.getElementById('pg-formula').addEventListener('input',()=>{
-    container.querySelectorAll('button').forEach(x=>{x.style.background='transparent';x.style.color='var(--fg2)';});
+  document.getElementById('pg-formula').addEventListener('input',function(){
+    container.querySelectorAll('button').forEach(function(x){x.style.background='transparent';x.style.color='var(--fg2)';});
     pgReset();
   });
   pgReset();
 }
-
-  const hm=document.getElementById('norm-heatmap');
-  hm.addEventListener('mousedown',e=>{dragging=true;[dotX,dotY]=hmCoords(e,hm);renderHeatmap()});
-  hm.addEventListener('mousemove',e=>{if(!dragging)return;[dotX,dotY]=hmCoords(e,hm);drawHMOverlay()});
-  document.addEventListener('mouseup',()=>dragging=false);
-  hm.addEventListener('touchstart',e=>{e.preventDefault();dragging=true;[dotX,dotY]=hmCoords(e,hm);renderHeatmap()},{passive:false});
-  hm.addEventListener('touchmove',e=>{e.preventDefault();if(!dragging)return;[dotX,dotY]=hmCoords(e,hm);drawHMOverlay()},{passive:false});
-  document.addEventListener('touchend',()=>dragging=false);
-});
 </script>
 </body>
 </html>
