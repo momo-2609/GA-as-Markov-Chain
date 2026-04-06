@@ -188,18 +188,28 @@ h1 span{color:var(--green2)}
     <div class="section-title">Mutation Normalising Constant Z(z, Σ)</div>
     <p class="section-sub">For diagonal Σ = diag(σ₁²,…,σₘ²) the constant factorises over components</p>
     <div class="formula-block">Z(z, Σ) = ∏ⱼ [ Φ((uʲ−zʲ)/σⱼ) − Φ((lʲ−zʲ)/σⱼ) ]</div>
-    <div class="info-note">Drag the green dot to change the mutation centre z ∈ [0,1]². The heatmap shows Z(z, Σ) — how much Gaussian mass stays inside the domain. Near boundaries, mass overshoots and the density inflates by 1/Z to compensate.</div>
-    <div id="norm-wrap">
-      <canvas id="norm-heatmap" style="width:100%;height:100%;cursor:crosshair;border-radius:8px;border:1px solid var(--bg3);display:block"></canvas>
+    <div class="info-note">Drag the dot to change the mutation centre z ∈ [0,1]². <strong style="color:var(--fg)">Blue = most mass escapes (low Z), red = almost none escapes (Z ≈ 1).</strong> Near boundaries, mass overshoots and the density inflates by 1/Z to compensate.</div>
+    <div style="position:relative;width:100%;margin-bottom:8px">
+      <canvas id="norm-heatmap" style="width:100%;display:block;cursor:crosshair;border-radius:8px;border:1px solid var(--bg3)"></canvas>
+      <canvas id="norm-overlay" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;border-radius:8px"></canvas>
     </div>
-    <div class="slider-row" style="margin-top:12px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+      <span style="font-size:11px;color:var(--fg3);font-family:'JetBrains Mono',monospace;white-space:nowrap">Z ≈ 0</span>
+      <canvas id="norm-legend" height="10" style="flex:1;border-radius:4px;height:10px;display:block"></canvas>
+      <span style="font-size:11px;color:var(--fg3);font-family:'JetBrains Mono',monospace;white-space:nowrap">Z ≈ 1</span>
+    </div>
+    <div class="slider-row">
       <label style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--fg2)">σ</label>
-      <input type="range" id="sl-sig" min="3" max="30" value="10" oninput="renderHeatmap()">
-      <span class="slider-val" id="val-sig">0.10</span>
+      <input type="range" id="sl-sig" min="3" max="35" value="12" step="1" oninput="renderHeatmap()">
+      <span class="slider-val" id="val-sig">0.12</span>
     </div>
-    <p id="norm-readout" style="font-size:13px;color:var(--fg2);font-family:'JetBrains Mono',monospace;margin-bottom:24px"></p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+      <div class="stat-card"><span class="stat-num" id="norm-zval">—</span><span class="stat-lbl">Z(z, Σ)</span></div>
+      <div class="stat-card"><span class="stat-num" id="norm-inf">—</span><span class="stat-lbl">density inflation (1/Z)</span></div>
+    </div>
+    <p id="norm-readout" style="font-size:12px;color:var(--fg3);font-family:'JetBrains Mono',monospace;margin-bottom:24px"></p>
     <div class="grid-3">
-      <div class="card"><h3>Interior point</h3><p>z = (0.5, 0.5): Z ≈ 1.00. Almost no mass escapes. No inflation of density.</p></div>
+      <div class="card"><h3>Interior point</h3><p>z = (0.5, 0.5): Z ≈ 1.00. Almost no mass escapes. No inflation needed.</p></div>
       <div class="card"><h3>Near one wall</h3><p>z = (0.5, 0.92): Z ≈ 0.79. ~21% of mass overshoots the upper boundary.</p></div>
       <div class="card"><h3>Corner point</h3><p>z = (0.05, 0.05): Z ≈ 0.25. Three-quarters of Gaussian mass exits the domain.</p></div>
     </div>
@@ -257,7 +267,7 @@ function show(id,btn){
   document.getElementById('sec-'+id).classList.add('active');
   btn.classList.add('active');
   if(id==='volume')setTimeout(()=>{initVolChart();updateVol()},50);
-  if(id==='normalise')setTimeout(()=>renderHeatmap(),50);
+  if(id==='normalise')setTimeout(()=>{renderHeatmap();buildLegend();},80);
   if(id==='kernel')updateKernel();
 }
 
@@ -316,37 +326,62 @@ updateKernel();
 // Heatmap
 let dotX=0.5,dotY=0.5,dragging=false;
 function getZ(x,y,sig){return(Phi((1-x)/sig)-Phi(-x/sig))*(Phi((1-y)/sig)-Phi(-y/sig))}
+function hmColor(t){
+  t=Math.max(0,Math.min(1,t));
+  if(t<0.5){const s=t*2;return[Math.round(40+s*215),Math.round(60+s*175),Math.round(220-s*20)];}
+  else{const s=(t-0.5)*2;return[Math.round(255-s*10),Math.round(235-s*140),Math.round(200-s*185)];}
+}
+function buildLegend(){
+  const leg=document.getElementById('norm-legend');
+  const W=leg.parentElement.clientWidth||400;
+  leg.width=W;leg.height=10;
+  const ctx=leg.getContext('2d');
+  for(let px=0;px<W;px++){const[r,g,b]=hmColor(px/W);ctx.fillStyle=`rgb(${r},${g},${b})`;ctx.fillRect(px,0,1,10);}
+}
+function drawHMOverlay(){
+  const hm=document.getElementById('norm-heatmap');
+  const ov=document.getElementById('norm-overlay');
+  const W=hm.width,H=hm.height;
+  ov.width=W;ov.height=H;
+  const ctx=ov.getContext('2d');
+  ctx.clearRect(0,0,W,H);
+  const px2=Math.round(dotX*W),py2=Math.round((1-dotY)*H);
+  ctx.beginPath();ctx.arc(px2,py2,8,0,2*Math.PI);ctx.fillStyle='#fff';ctx.fill();
+  ctx.beginPath();ctx.arc(px2,py2,8,0,2*Math.PI);ctx.strokeStyle='#222';ctx.lineWidth=1.5;ctx.stroke();
+  ctx.beginPath();ctx.arc(px2,py2,3,0,2*Math.PI);ctx.fillStyle='#222';ctx.fill();
+  const sig=+document.getElementById('sl-sig').value/100;
+  const zval=getZ(dotX,dotY,sig);
+  document.getElementById('norm-zval').textContent=zval.toFixed(4);
+  document.getElementById('norm-inf').textContent=(1/zval).toFixed(2)+'×';
+  document.getElementById('norm-readout').textContent=`z = (${dotX.toFixed(2)}, ${dotY.toFixed(2)})   σ = ${sig.toFixed(2)}`;
+}
 function renderHeatmap(){
   const sig=+document.getElementById('sl-sig').value/100;
   document.getElementById('val-sig').textContent=sig.toFixed(2);
-  const wrap=document.getElementById('norm-wrap');
-  const canvas=document.getElementById('norm-heatmap');
-  const W=wrap.clientWidth||500,H=wrap.clientHeight||240;
-  canvas.width=W;canvas.height=H;
-  const ctx=canvas.getContext('2d');
+  const hm=document.getElementById('norm-heatmap');
+  const W=hm.parentElement.clientWidth||500,H=Math.round(W/2);
+  hm.width=W;hm.height=H;
+  hm.style.height=H+'px';
+  const ctx=hm.getContext('2d');
   const img=ctx.createImageData(W,H);
-  for(let py=0;py<H;py++){for(let px=0;px<W;px++){const cx=px/W,cy=1-py/H,z=Math.max(0,Math.min(1,getZ(cx,cy,sig)));let r,g,b;if(dark){r=Math.round(20+z*82);g=Math.round(20+z*140);b=Math.round(20+z*82);}else{r=Math.round(255-z*68);g=Math.round(255-z*33);b=Math.round(255-z*80);}const idx=(py*W+px)*4;img.data[idx]=r;img.data[idx+1]=g;img.data[idx+2]=b;img.data[idx+3]=255;}}
+  for(let py=0;py<H;py++){for(let px=0;px<W;px++){const[r,g,b]=hmColor(getZ(px/W,1-py/H,sig));const idx=(py*W+px)*4;img.data[idx]=r;img.data[idx+1]=g;img.data[idx+2]=b;img.data[idx+3]=255;}}
   ctx.putImageData(img,0,0);
-  ctx.strokeStyle=dark?'rgba(255,255,255,.15)':'rgba(0,0,0,.12)';ctx.lineWidth=1;ctx.strokeRect(0,0,W,H);
-  const px2=Math.round(dotX*W),py2=Math.round((1-dotY)*H);
-  ctx.beginPath();ctx.arc(px2,py2,7,0,2*Math.PI);ctx.fillStyle=GREEN;ctx.fill();
-  ctx.beginPath();ctx.arc(px2,py2,7,0,2*Math.PI);ctx.strokeStyle='#fff';ctx.lineWidth=1.5;ctx.stroke();
-  const zval=getZ(dotX,dotY,sig);
-  document.getElementById('norm-readout').textContent=`z = (${dotX.toFixed(2)}, ${dotY.toFixed(2)})   σ = ${sig.toFixed(2)}   Z = ${zval.toFixed(4)}   density inflation ≈ ${(1/zval).toFixed(2)}×`;
+  drawHMOverlay();
+  buildLegend();
 }
-function canvasCoords(e,canvas){
-  const r=canvas.getBoundingClientRect();
+function hmCoords(e,el){
+  const r=el.getBoundingClientRect();
   const ex=e.touches?e.touches[0].clientX:e.clientX;
   const ey=e.touches?e.touches[0].clientY:e.clientY;
   return[Math.max(0,Math.min(1,(ex-r.left)/r.width)),Math.max(0,Math.min(1,1-(ey-r.top)/r.height))];
 }
 window.addEventListener('DOMContentLoaded',()=>{
-  const canvas=document.getElementById('norm-heatmap');
-  canvas.addEventListener('mousedown',e=>{dragging=true;[dotX,dotY]=canvasCoords(e,canvas);renderHeatmap()});
-  canvas.addEventListener('mousemove',e=>{if(!dragging)return;[dotX,dotY]=canvasCoords(e,canvas);renderHeatmap()});
+  const hm=document.getElementById('norm-heatmap');
+  hm.addEventListener('mousedown',e=>{dragging=true;[dotX,dotY]=hmCoords(e,hm);renderHeatmap()});
+  hm.addEventListener('mousemove',e=>{if(!dragging)return;[dotX,dotY]=hmCoords(e,hm);drawHMOverlay()});
   document.addEventListener('mouseup',()=>dragging=false);
-  canvas.addEventListener('touchstart',e=>{e.preventDefault();dragging=true;[dotX,dotY]=canvasCoords(e,canvas);renderHeatmap()},{passive:false});
-  canvas.addEventListener('touchmove',e=>{e.preventDefault();if(!dragging)return;[dotX,dotY]=canvasCoords(e,canvas);renderHeatmap()},{passive:false});
+  hm.addEventListener('touchstart',e=>{e.preventDefault();dragging=true;[dotX,dotY]=hmCoords(e,hm);renderHeatmap()},{passive:false});
+  hm.addEventListener('touchmove',e=>{e.preventDefault();if(!dragging)return;[dotX,dotY]=hmCoords(e,hm);drawHMOverlay()},{passive:false});
   document.addEventListener('touchend',()=>dragging=false);
 });
 </script>
