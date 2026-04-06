@@ -112,6 +112,7 @@ h1 span{color:var(--green2)}
     <button class="tab-btn" onclick="show('volume',this)">Crossover Volume</button>
     <button class="tab-btn" onclick="show('kernel',this)">Offspring Kernel</button>
     <button class="tab-btn" onclick="show('normalise',this)">Mutation Normaliser</button>
+    <button class="tab-btn" onclick="show('playground',this)">GA Playground</button>
   </div>
 </div>
 
@@ -144,8 +145,37 @@ h1 span{color:var(--green2)}
   <!-- VOLUME -->
   <div id="sec-volume" class="section">
     <div class="section-title">Crossover Hyperrectangle Volume</div>
-    <p class="section-sub">Expected volume of R(a, b) relative to the full domain — collapses exponentially with dimension M</p>
+    <p class="section-sub">Drag the parents, click to scatter offspring — they land only inside R(a,b)</p>
     <div class="formula-block">𝔼[Vol(R(a,b))] = Vol(𝒟) / 3ᴹ</div>
+
+    <p style="font-size:13px;color:var(--fg2);text-align:center;margin-bottom:10px">Drag <span style="color:#1B4332;font-weight:500">a</span> and <span style="color:#854F0B;font-weight:500">b</span> to reposition parents &nbsp;·&nbsp; click anywhere to spawn offspring</p>
+    <div style="position:relative;width:100%;margin-bottom:12px">
+      <canvas id="xo-canvas" style="display:block;width:100%;border-radius:10px;border:1px solid var(--bg3);background:var(--bg2);cursor:crosshair"></canvas>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px">
+      <div class="stat-card"><span class="stat-num" id="xo-vol">—</span><span class="stat-lbl">R(a,b) / domain</span></div>
+      <div class="stat-card"><span class="stat-num" id="xo-n">0</span><span class="stat-lbl">offspring dropped</span></div>
+      <div class="stat-card"><span class="stat-num" style="color:#c0392b" id="xo-esc">0%</span><span class="stat-lbl">escaped R (mutation)</span></div>
+    </div>
+
+    <div class="slider-row">
+      <label>offspring / click</label>
+      <input type="range" id="sl-batch" min="1" max="30" value="8" step="1" oninput="document.getElementById('vl-batch').textContent=this.value">
+      <span class="slider-val" id="vl-batch">8</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;color:var(--fg2);cursor:pointer">
+        <input type="checkbox" id="cb-mut" style="width:15px;height:15px">
+        show mutation (σ = 0.06) — offspring turn <span style="color:#c0392b;font-weight:500">red</span> and can escape R
+      </label>
+    </div>
+    <div style="display:flex;gap:8px;margin-bottom:28px">
+      <button onclick="xoClear()" style="font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer">Clear offspring</button>
+      <button onclick="xoRandom()" style="font-size:12px;padding:6px 14px;border-radius:6px;border:1px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer">Random parents</button>
+    </div>
+
+    <p style="font-size:13px;color:var(--fg2);margin-bottom:8px">The volume collapse gets worse in higher dimensions:</p>
     <div id="vol-chart-wrap"><canvas id="vol-chart"></canvas></div>
     <div class="stat-row" id="stat-row"></div>
     <div class="slider-row">
@@ -213,7 +243,50 @@ h1 span{color:var(--green2)}
       <div class="card"><h3>Near one wall</h3><p>z = (0.5, 0.92): Z ≈ 0.79. ~21% of mass overshoots the upper boundary.</p></div>
       <div class="card"><h3>Corner point</h3><p>z = (0.05, 0.05): Z ≈ 0.25. Three-quarters of Gaussian mass exits the domain.</p></div>
     </div>
-    <div style="margin-top:32px;padding-top:24px;border-top:1px solid var(--bg3)">
+    </div>
+  </div>
+
+</div><!-- /content -->
+
+  <!-- PLAYGROUND -->
+  <div id="sec-playground" class="section" style="max-width:860px;margin:0 auto;padding:36px 40px">
+    <div class="section-title">GA Playground</div>
+    <p class="section-sub">Pick a function, tune the constants, watch the population evolve</p>
+
+    <div id="pg-presets" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+
+    <div class="slider-row">
+      <label style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--fg2)">f(x,y) =</label>
+      <input id="pg-formula" style="flex:1;font-family:'JetBrains Mono',monospace;font-size:13px;padding:7px 12px;border-radius:6px;border:1px solid var(--bg3);background:var(--bg2);color:var(--fg);min-width:0" value="sin(3*x)*cos(3*y)+0.5*sin(6*x+y)">
+    </div>
+    <p id="pg-err" style="font-size:12px;color:#c0392b;min-height:18px;margin-bottom:10px"></p>
+
+    <div class="slider-row"><label>population N</label><input type="range" id="pg-N" min="10" max="100" value="30" step="1" oninput="document.getElementById('pg-vN').textContent=this.value"><span class="slider-val" id="pg-vN">30</span></div>
+    <div class="slider-row"><label>tournament k</label><input type="range" id="pg-k" min="2" max="10" value="3" step="1" oninput="document.getElementById('pg-vk').textContent=this.value"><span class="slider-val" id="pg-vk">3</span></div>
+    <div class="slider-row"><label>mutation σ</label><input type="range" id="pg-sig" min="1" max="30" value="8" step="1" oninput="document.getElementById('pg-vsig').textContent=(this.value/100).toFixed(2)"><span class="slider-val" id="pg-vsig">0.08</span></div>
+    <div class="slider-row"><label>crossover p<sub>c</sub></label><input type="range" id="pg-pc" min="0" max="100" value="70" step="1" oninput="document.getElementById('pg-vpc').textContent=(this.value/100).toFixed(2)"><span class="slider-val" id="pg-vpc">0.70</span></div>
+    <div class="slider-row"><label>mutation p<sub>m</sub></label><input type="range" id="pg-pm" min="0" max="100" value="30" step="1" oninput="document.getElementById('pg-vpm').textContent=(this.value/100).toFixed(2)"><span class="slider-val" id="pg-vpm">0.30</span></div>
+    <div class="slider-row"><label>speed</label><input type="range" id="pg-spd" min="1" max="10" value="3" step="1" oninput="document.getElementById('pg-vspd').textContent=this.value"><span class="slider-val" id="pg-vspd">3</span></div>
+
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
+      <button id="pg-btn-run" onclick="pgToggleRun()" style="font-size:12px;padding:7px 16px;border-radius:6px;border:1px solid var(--green4);background:var(--green3);color:var(--green2);cursor:pointer">▶ Run</button>
+      <button onclick="pgReset()" style="font-size:12px;padding:7px 16px;border-radius:6px;border:1px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer">↺ Reset</button>
+      <button onclick="pgStep()" style="font-size:12px;padding:7px 16px;border-radius:6px;border:1px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer">Step +1</button>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px">
+      <div class="stat-card"><span class="stat-num" id="pg-sgen">0</span><span class="stat-lbl">generation</span></div>
+      <div class="stat-card"><span class="stat-num" id="pg-sbest">—</span><span class="stat-lbl">best fitness</span></div>
+      <div class="stat-card"><span class="stat-num" id="pg-smean">—</span><span class="stat-lbl">mean fitness</span></div>
+      <div class="stat-card"><span class="stat-num" id="pg-spos" style="font-size:12px">—</span><span class="stat-lbl">best position</span></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+      <canvas id="pg-land" style="display:block;width:100%;border-radius:10px;border:1px solid var(--bg3)"></canvas>
+      <canvas id="pg-chart" style="display:block;width:100%;border-radius:10px;border:1px solid var(--bg3)"></canvas>
+    </div>
+
+    <div style="margin-top:8px;padding-top:24px;border-top:1px solid var(--bg3)">
       <div class="section-title" style="font-size:18px;margin-bottom:10px">References</div>
       <ul class="ref-list">
         <li>G. Rudolph, <em>Convergence analysis of canonical genetic algorithms</em>, IEEE Trans. Neural Networks 5(1):96–101, 1994.</li>
@@ -222,8 +295,6 @@ h1 span{color:var(--green2)}
       </ul>
     </div>
   </div>
-
-</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
@@ -264,11 +335,13 @@ function Phi(x){let t=1/(1+0.2316419*Math.abs(x)),p=t*(0.319381530+t*(-0.3565637
 function show(id,btn){
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-  document.getElementById('sec-'+id).classList.add('active');
+  const sec=document.getElementById('sec-'+id);
+  if(sec)sec.classList.add('active');
   btn.classList.add('active');
-  if(id==='volume')setTimeout(()=>{initVolChart();updateVol()},50);
+  if(id==='volume')setTimeout(()=>{initVolChart();updateVol();const cv=document.getElementById('xo-canvas');if(cv){const W=cv.parentElement.clientWidth||500;const H=Math.round(W*0.55);cv.width=W;cv.height=H;}},50);
   if(id==='normalise')setTimeout(()=>{renderHeatmap();buildLegend();},80);
   if(id==='kernel')updateKernel();
+  if(id==='playground')setTimeout(()=>pgInit(),80);
 }
 
 // Tournament
@@ -323,6 +396,75 @@ function updateKernel(){
 }
 updateKernel();
 
+// Crossover canvas
+(function(){
+  const cv=document.getElementById('xo-canvas');
+  if(!cv)return;
+  const ctx=cv.getContext('2d');
+  let W,H,PAD=32;
+  let pa={x:0.25,y:0.6},pb={x:0.72,y:0.3};
+  let offspring=[],totalDropped=0,totalEsc=0,dragging=null;
+  const C={
+    rectFill:dark?'rgba(55,138,221,0.12)':'rgba(55,138,221,0.10)',
+    rectStroke:dark?'#378ADD':'#185FA5',
+    a:dark?'#52b788':'#1B4332',
+    b:dark?'#EF9F27':'#854F0B',
+    off:dark?'rgba(160,100,210,0.7)':'rgba(110,50,170,0.65)',
+    offMut:dark?'rgba(220,80,80,0.75)':'rgba(180,30,30,0.65)',
+    grid:dark?'rgba(255,255,255,0.04)':'rgba(0,0,0,0.04)',
+  };
+  function resize(){W=cv.parentElement.clientWidth||500;H=Math.round(W*0.55);cv.width=W;cv.height=H;draw();}
+  function toC(nx,ny){return{x:PAD+nx*(W-2*PAD),y:PAD+ny*(H-2*PAD)}}
+  function toN(cx,cy){return{x:Math.max(0,Math.min(1,(cx-PAD)/(W-2*PAD))),y:Math.max(0,Math.min(1,(cy-PAD)/(H-2*PAD)))}}
+  function rn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+  function draw(){
+    ctx.clearRect(0,0,W,H);
+    ctx.strokeStyle=C.grid;ctx.lineWidth=1;
+    for(let i=0;i<=10;i++){const x=PAD+i*(W-2*PAD)/10,y=PAD+i*(H-2*PAD)/10;ctx.beginPath();ctx.moveTo(x,PAD);ctx.lineTo(x,H-PAD);ctx.stroke();ctx.beginPath();ctx.moveTo(PAD,y);ctx.lineTo(W-PAD,y);ctx.stroke();}
+    ctx.strokeStyle=FG2;ctx.lineWidth=0.5;ctx.strokeRect(PAD,PAD,W-2*PAD,H-2*PAD);
+    const ca=toC(pa.x,pa.y),cb=toC(pb.x,pb.y);
+    const rx=Math.min(ca.x,cb.x),ry=Math.min(ca.y,cb.y),rw=Math.abs(ca.x-cb.x),rh=Math.abs(ca.y-cb.y);
+    ctx.fillStyle=C.rectFill;ctx.fillRect(rx,ry,rw,rh);
+    ctx.strokeStyle=C.rectStroke;ctx.lineWidth=1.5;ctx.setLineDash([5,3]);ctx.strokeRect(rx,ry,rw,rh);ctx.setLineDash([]);
+    if(rw>44&&rh>18){ctx.fillStyle=C.rectStroke;ctx.font='11px monospace';ctx.textAlign='center';ctx.fillText('R(a,b)',rx+rw/2,ry+rh/2+4);}
+    for(const o of offspring){const c=toC(o.x,o.y);ctx.beginPath();ctx.arc(c.x,c.y,3,0,2*Math.PI);ctx.fillStyle=o.mut?C.offMut:C.off;ctx.fill();}
+    ctx.strokeStyle=C.rectStroke;ctx.lineWidth=0.5;ctx.setLineDash([3,3]);ctx.globalAlpha=0.35;
+    ctx.beginPath();ctx.moveTo(ca.x,ca.y);ctx.lineTo(rx,ry);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cb.x,cb.y);ctx.lineTo(rx+rw,ry+rh);ctx.stroke();
+    ctx.globalAlpha=1;ctx.setLineDash([]);
+    [['a',ca,C.a],['b',cb,C.b]].forEach(([lbl,c,col])=>{ctx.beginPath();ctx.arc(c.x,c.y,9,0,2*Math.PI);ctx.fillStyle=col;ctx.fill();ctx.fillStyle='#fff';ctx.font='bold 10px sans-serif';ctx.textAlign='center';ctx.fillText(lbl,c.x,c.y+4);});
+    const vol=Math.abs(pa.x-pb.x)*Math.abs(pa.y-pb.y);
+    document.getElementById('xo-vol').textContent=(vol*100).toFixed(1)+'%';
+    document.getElementById('xo-n').textContent=totalDropped;
+    document.getElementById('xo-esc').textContent=totalDropped>0?Math.round(totalEsc/totalDropped*100)+'%':'0%';
+  }
+  function spawn(nx,ny){
+    const batch=+document.getElementById('sl-batch').value;
+    const useMut=document.getElementById('cb-mut').checked;
+    const lx=Math.min(pa.x,pb.x),ux=Math.max(pa.x,pb.x),ly=Math.min(pa.y,pb.y),uy=Math.max(pa.y,pb.y);
+    for(let i=0;i<batch;i++){
+      let ox=lx+Math.random()*(ux-lx),oy=ly+Math.random()*(uy-ly),esc=false;
+      if(useMut){const s=0.06;ox=Math.max(0,Math.min(1,ox+rn()*s));oy=Math.max(0,Math.min(1,oy+rn()*s));if(ox<lx||ox>ux||oy<ly||oy>uy)esc=true;}
+      offspring.push({x:ox,y:oy,mut:useMut,esc});
+      totalDropped++;if(esc)totalEsc++;
+    }
+    if(offspring.length>500)offspring=offspring.slice(-500);
+    draw();
+  }
+  window.xoClear=function(){offspring=[];totalDropped=0;totalEsc=0;draw();}
+  window.xoRandom=function(){pa={x:0.1+Math.random()*0.35,y:0.1+Math.random()*0.8};pb={x:0.55+Math.random()*0.35,y:0.1+Math.random()*0.8};offspring=[];totalDropped=0;totalEsc=0;draw();}
+  function hit(cx,cy){const ca=toC(pa.x,pa.y),cb=toC(pb.x,pb.y);if(Math.hypot(cx-ca.x,cy-ca.y)<14)return'a';if(Math.hypot(cx-cb.x,cy-cb.y)<14)return'b';return null;}
+  function pos(e){const r=cv.getBoundingClientRect();const ex=e.touches?e.touches[0].clientX:e.clientX,ey=e.touches?e.touches[0].clientY:e.clientY;return{cx:ex-r.left,cy:ey-r.top};}
+  cv.addEventListener('mousedown',e=>{const{cx,cy}=pos(e);const h=hit(cx,cy);if(h)dragging=h;else spawn(...Object.values(toN(cx,cy)));});
+  cv.addEventListener('mousemove',e=>{if(!dragging)return;const n=toN(...Object.values(pos(e)));if(dragging==='a')pa=n;else pb=n;draw();});
+  document.addEventListener('mouseup',()=>dragging=null);
+  cv.addEventListener('touchstart',e=>{e.preventDefault();const{cx,cy}=pos(e);const h=hit(cx,cy);if(h)dragging=h;else spawn(...Object.values(toN(cx,cy)));},{passive:false});
+  cv.addEventListener('touchmove',e=>{e.preventDefault();if(!dragging)return;const n=toN(...Object.values(pos(e)));if(dragging==='a')pa=n;else pb=n;draw();},{passive:false});
+  document.addEventListener('touchend',()=>dragging=null);
+  window.addEventListener('resize',resize);
+  resize();
+})();
+
 // Heatmap
 let dotX=0.5,dotY=0.5,dragging=false;
 function getZ(x,y,sig){return(Phi((1-x)/sig)-Phi(-x/sig))*(Phi((1-y)/sig)-Phi(-y/sig))}
@@ -375,7 +517,204 @@ function hmCoords(e,el){
   const ey=e.touches?e.touches[0].clientY:e.clientY;
   return[Math.max(0,Math.min(1,(ex-r.left)/r.width)),Math.max(0,Math.min(1,1-(ey-r.top)/r.height))];
 }
-window.addEventListener('DOMContentLoaded',()=>{
+// ── GA PLAYGROUND ──────────────────────────────────────────────
+const PG_PRESETS=[
+  {name:'Bumpy',expr:'sin(3*x)*cos(3*y)+0.5*sin(6*x+y)'},
+  {name:'Rastrigin',expr:'-(x*x+y*y)+cos(6.28*x)+cos(6.28*y)'},
+  {name:'Peaks',expr:'3*(1-x)**2*exp(-(x**2)-(y+1)**2)-10*(x/5-x**3-y**5)*exp(-x**2-y**2)-(1/3)*exp(-(x+1)**2-y**2)'},
+  {name:'Wavy',expr:'sin(5*x)*sin(5*y)*exp(-(x**2+y**2)/2)'},
+  {name:'Bowl',expr:'-(x**2+y**2)'},
+];
+let pgReady=false,pgPop=null,pgGen=0,pgRunning=false,pgAnimId=null;
+let pgBestEver=null,pgLandscape=null,pgLMin=0,pgLMax=1,pgOffscreen=null;
+let pgChart=null;
+const PG_DOM=[-2,2],PG_RES=100;
+
+function pgSafeEval(expr,x,y){
+  try{const fn=new Function('x','y','sin','cos','exp','sqrt','abs','log','PI',`"use strict";return ${expr.replace(/\^/g,'**')};`);const v=fn(x,y,Math.sin,Math.cos,Math.exp,Math.sqrt,Math.abs,Math.log,Math.PI);return isFinite(v)?v:null;}catch{return null;}
+}
+
+function pgBuildLandscape(){
+  const expr=document.getElementById('pg-formula').value;
+  const test=pgSafeEval(expr,0,0);
+  if(test===null){document.getElementById('pg-err').textContent='⚠ invalid expression';pgLandscape=null;return false;}
+  document.getElementById('pg-err').textContent='';
+  const d=new Float32Array(PG_RES*PG_RES);
+  let mn=Infinity,mx=-Infinity;
+  for(let j=0;j<PG_RES;j++){for(let i=0;i<PG_RES;i++){
+    const x=PG_DOM[0]+(PG_DOM[1]-PG_DOM[0])*i/(PG_RES-1);
+    const y=PG_DOM[0]+(PG_DOM[1]-PG_DOM[0])*j/(PG_RES-1);
+    const v=pgSafeEval(expr,x,y)??0;
+    d[j*PG_RES+i]=v;if(v<mn)mn=v;if(v>mx)mx=v;
+  }}
+  pgLandscape=d;pgLMin=mn;pgLMax=mx;
+  return true;
+}
+
+function pgHeatColor(t){
+  t=Math.max(0,Math.min(1,t));
+  const stops=[[5,10,60],[20,60,140],[40,140,100],[200,210,50],[230,100,20],[180,20,10]];
+  const s=t*(stops.length-1),i=Math.floor(s),f=s-i;
+  const a=stops[Math.min(i,stops.length-1)],b=stops[Math.min(i+1,stops.length-1)];
+  return[Math.round(a[0]+(b[0]-a[0])*f),Math.round(a[1]+(b[1]-a[1])*f),Math.round(a[2]+(b[2]-a[2])*f)];
+}
+
+function pgDrawLandscape(){
+  const cvL=document.getElementById('pg-land');if(!cvL)return;
+  const W=cvL.parentElement.clientWidth||300,H=W;
+  cvL.width=W;cvL.height=H;
+  const ctxL=cvL.getContext('2d');
+  if(!pgLandscape){ctxL.fillStyle=BG2;ctxL.fillRect(0,0,W,H);return;}
+  pgOffscreen=document.createElement('canvas');pgOffscreen.width=PG_RES;pgOffscreen.height=PG_RES;
+  const oc=pgOffscreen.getContext('2d');
+  const img=oc.createImageData(PG_RES,PG_RES);
+  for(let j=0;j<PG_RES;j++){for(let i=0;i<PG_RES;i++){
+    const t=(pgLandscape[j*PG_RES+i]-pgLMin)/(pgLMax-pgLMin||1);
+    const[r,g,b]=pgHeatColor(t);
+    const idx=(j*PG_RES+i)*4;img.data[idx]=r;img.data[idx+1]=g;img.data[idx+2]=b;img.data[idx+3]=255;
+  }}
+  oc.putImageData(img,0,0);
+  ctxL.drawImage(pgOffscreen,0,0,W,H);
+}
+
+function pgDrawPop(){
+  const cvL=document.getElementById('pg-land');if(!cvL||!pgOffscreen)return;
+  const W=cvL.width,H=cvL.height;
+  const ctxL=cvL.getContext('2d');
+  ctxL.drawImage(pgOffscreen,0,0,W,H);
+  const span=PG_DOM[1]-PG_DOM[0];
+  if(pgPop){
+    for(const ind of pgPop){
+      const px=(ind.x-PG_DOM[0])/span*W,py=(ind.y-PG_DOM[0])/span*H;
+      ctxL.beginPath();ctxL.arc(px,py,3,0,2*Math.PI);
+      ctxL.fillStyle='rgba(255,255,255,0.75)';ctxL.fill();
+      ctxL.strokeStyle='rgba(0,0,0,0.4)';ctxL.lineWidth=0.7;ctxL.stroke();
+    }
+  }
+  if(pgBestEver){
+    const px=(pgBestEver.x-PG_DOM[0])/span*W,py=(pgBestEver.y-PG_DOM[0])/span*H;
+    ctxL.beginPath();ctxL.arc(px,py,7,0,2*Math.PI);
+    ctxL.fillStyle='rgba(255,220,0,0.95)';ctxL.fill();
+    ctxL.strokeStyle='#333';ctxL.lineWidth=1.2;ctxL.stroke();
+  }
+}
+
+function pgInitChart(){
+  const cvC=document.getElementById('pg-chart');if(!cvC)return;
+  const W=cvC.parentElement.clientWidth||300;cvC.width=W;cvC.height=W;
+  if(pgChart)pgChart.destroy();
+  pgChart=new Chart(cvC,{type:'line',data:{labels:[],datasets:[
+    {label:'best',data:[],borderColor:'#f0a500',borderWidth:2,pointRadius:0,tension:.3,fill:false},
+    {label:'mean',data:[],borderColor:GREEN,borderWidth:1.5,pointRadius:0,tension:.3,fill:false,borderDash:[4,3]},
+  ]},options:{responsive:false,animation:false,plugins:{legend:{labels:{color:FG2,font:{size:11},boxWidth:12}}},scales:{x:{ticks:{color:FG2,font:{size:10},maxTicksLimit:8},grid:{color:BG3},title:{display:true,text:'generation',color:FG2,font:{size:11}}},y:{ticks:{color:FG2,font:{size:10}},grid:{color:BG3},title:{display:true,text:'fitness',color:FG2,font:{size:11}}}}}});
+}
+
+function pgFitness(ind){return pgSafeEval(document.getElementById('pg-formula').value,ind.x,ind.y)??-Infinity;}
+function pgRandNorm(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v);}
+function pgClamp(v){return Math.max(PG_DOM[0],Math.min(PG_DOM[1],v));}
+
+function pgTournament(k){
+  let best=null;
+  for(let i=0;i<k;i++){const c=pgPop[Math.floor(Math.random()*pgPop.length)];if(!best||c.f>best.f)best=c;}
+  return best;
+}
+
+function pgInitPop(){
+  const N=+document.getElementById('pg-N').value;
+  pgPop=Array.from({length:N},()=>{
+    const x=PG_DOM[0]+Math.random()*(PG_DOM[1]-PG_DOM[0]);
+    const y=PG_DOM[0]+Math.random()*(PG_DOM[1]-PG_DOM[0]);
+    return{x,y,f:0};
+  });
+  pgPop.forEach(ind=>ind.f=pgFitness(ind));
+  pgPop.sort((a,b)=>a.f-b.f);
+}
+
+function pgStepGA(){
+  const k=+document.getElementById('pg-k').value;
+  const sig=+document.getElementById('pg-sig').value/100;
+  const pc=+document.getElementById('pg-pc').value/100;
+  const pm=+document.getElementById('pg-pm').value/100;
+  const N=pgPop.length;
+  const next=[];
+  for(let i=0;i<N;i++){
+    const pa=pgTournament(k);
+    let cx=pa.x,cy=pa.y;
+    if(Math.random()<pc){const pb=pgTournament(k);const a=Math.random();cx=a*pa.x+(1-a)*pb.x;cy=a*pa.y+(1-a)*pb.y;}
+    if(Math.random()<pm){cx=pgClamp(cx+pgRandNorm()*sig);cy=pgClamp(cy+pgRandNorm()*sig);}
+    next.push({x:cx,y:cy,f:pgFitness({x:cx,y:cy})});
+  }
+  pgPop=next;pgPop.sort((a,b)=>a.f-b.f);
+  pgGen++;
+  const best=pgPop[pgPop.length-1];
+  const mean=pgPop.reduce((s,i)=>s+i.f,0)/pgPop.length;
+  if(!pgBestEver||best.f>pgBestEver.f)pgBestEver={...best};
+  document.getElementById('pg-sgen').textContent=pgGen;
+  document.getElementById('pg-sbest').textContent=best.f.toFixed(3);
+  document.getElementById('pg-smean').textContent=mean.toFixed(3);
+  document.getElementById('pg-spos').textContent=`(${best.x.toFixed(2)},${best.y.toFixed(2)})`;
+  if(pgChart){
+    pgChart.data.labels.push(pgGen);
+    pgChart.data.datasets[0].data.push(best.f);
+    pgChart.data.datasets[1].data.push(mean);
+    if(pgChart.data.labels.length>200){pgChart.data.labels.shift();pgChart.data.datasets[0].data.shift();pgChart.data.datasets[1].data.shift();}
+    pgChart.update('none');
+  }
+  pgDrawPop();
+}
+
+function pgReset(){
+  pgRunning=false;cancelAnimationFrame(pgAnimId);
+  document.getElementById('pg-btn-run').textContent='▶ Run';
+  pgGen=0;pgBestEver=null;pgPop=null;
+  document.getElementById('pg-sgen').textContent='0';
+  document.getElementById('pg-sbest').textContent='—';
+  document.getElementById('pg-smean').textContent='—';
+  document.getElementById('pg-spos').textContent='—';
+  if(pgBuildLandscape()){pgDrawLandscape();pgInitPop();pgDrawPop();}
+  pgInitChart();
+}
+
+let pgLastT=0;
+function pgLoop(t){
+  if(!pgRunning)return;
+  const spd=+document.getElementById('pg-spd').value;
+  const delay=Math.max(0,300-spd*28);
+  if(t-pgLastT>delay){pgLastT=t;pgStepGA();}
+  pgAnimId=requestAnimationFrame(pgLoop);
+}
+
+function pgToggleRun(){
+  pgRunning=!pgRunning;
+  document.getElementById('pg-btn-run').textContent=pgRunning?'⏸ Pause':'▶ Run';
+  if(pgRunning){if(!pgPop)pgInitPop();pgAnimId=requestAnimationFrame(pgLoop);}
+  else cancelAnimationFrame(pgAnimId);
+}
+function pgStep(){if(!pgPop){if(!pgBuildLandscape())return;pgDrawLandscape();pgInitPop();}pgStepGA();}
+
+function pgInit(){
+  if(pgReady)return;pgReady=true;
+  const container=document.getElementById('pg-presets');
+  PG_PRESETS.forEach((p,i)=>{
+    const b=document.createElement('button');
+    b.style.cssText='font-size:12px;padding:5px 12px;border-radius:20px;border:0.5px solid var(--bg3);background:transparent;color:var(--fg2);cursor:pointer;transition:all .15s';
+    if(i===0){b.style.background='var(--green3)';b.style.color='var(--green2)';}
+    b.textContent=p.name;
+    b.onclick=()=>{
+      document.getElementById('pg-formula').value=p.expr;
+      container.querySelectorAll('button').forEach(x=>{x.style.background='transparent';x.style.color='var(--fg2)';});
+      b.style.background='var(--green3)';b.style.color='var(--green2)';
+      pgReset();
+    };
+    container.appendChild(b);
+  });
+  document.getElementById('pg-formula').addEventListener('input',()=>{
+    container.querySelectorAll('button').forEach(x=>{x.style.background='transparent';x.style.color='var(--fg2)';});
+    pgReset();
+  });
+  pgReset();
+}
+
   const hm=document.getElementById('norm-heatmap');
   hm.addEventListener('mousedown',e=>{dragging=true;[dotX,dotY]=hmCoords(e,hm);renderHeatmap()});
   hm.addEventListener('mousemove',e=>{if(!dragging)return;[dotX,dotY]=hmCoords(e,hm);drawHMOverlay()});
