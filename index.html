@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Genetic Algorithms as Markov Chains</title>
+<title>Genetic Algorithms as Markov Chains</title>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
@@ -246,10 +246,8 @@ h1 span{color:var(--green2)}
     </div>
   </div>
 
-</div><!-- /content -->
-
   <!-- PLAYGROUND -->
-  <div id="sec-playground" class="section" style="max-width:860px;margin:0 auto;padding:36px 40px">
+  <div id="sec-playground" class="section">
     <div class="section-title">GA Playground</div>
     <p class="section-sub">Pick a function, tune the constants, watch the population evolve</p>
 
@@ -296,6 +294,8 @@ h1 span{color:var(--green2)}
     </div>
   </div>
 
+</div><!-- /content -->
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <script>
 const dark=matchMedia('(prefers-color-scheme:dark)').matches;
@@ -338,7 +338,7 @@ function show(id,btn){
   const sec=document.getElementById('sec-'+id);
   if(sec)sec.classList.add('active');
   btn.classList.add('active');
-  if(id==='volume')setTimeout(()=>{initVolChart();updateVol();const cv=document.getElementById('xo-canvas');if(cv){const W=cv.parentElement.clientWidth||500;const H=Math.round(W*0.55);cv.width=W;cv.height=H;}},50);
+  if(id==='volume')setTimeout(()=>{initVolChart();updateVol();const cv=document.getElementById('xo-canvas');if(cv){const W=cv.parentElement.clientWidth||500;cv.width=W;cv.height=Math.round(W*0.55);}},50);
   if(id==='normalise')setTimeout(()=>{renderHeatmap();buildLegend();},80);
   if(id==='kernel')updateKernel();
   if(id==='playground')setTimeout(()=>pgInit(),80);
